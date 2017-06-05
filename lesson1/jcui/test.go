@@ -22,14 +22,14 @@ func main() {
 	fmt.Println(x, y)
 }
 
-//将x和y的值对掉
+//将x和y的值对调
 func swap(p *int, q *int) {
 	var t = *p
 	*p = *q
 	*q = t
 }
 
-//x和y的指针对掉，值不变
+//x和y的指针对调，值不变
 func swap_a(p *int, q *int) {
 	var t = p
 	p = q
