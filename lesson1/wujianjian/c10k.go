@@ -7,22 +7,25 @@ import (
 	"time"
 )
 
-func handle(conn net.Conn) {
+func handler(conn net.Conn) {
+	defer conn.Close()
 	fmt.Fprintf(conn, "%s", time.Now().String())
-	conn.Close()
 }
 
 func main() {
-	l, err := net.Listen("tcp", ":8080")
+	addr := ":8080"
+	ls, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for {
-		conn, err := l.Accept()
+		conn, err := ls.Accept()
 		if err != nil {
 			log.Fatal(err)
 		}
-		go handle(conn)
+
+		go handler(conn)
+
 	}
 }
