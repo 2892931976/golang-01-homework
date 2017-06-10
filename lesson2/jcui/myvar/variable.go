@@ -1,7 +1,6 @@
 package myvar
 
 import "fmt"
-import "net"
 
 func main() {
 	// 定义全局变量
