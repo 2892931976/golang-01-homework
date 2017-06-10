@@ -18,6 +18,7 @@ func printFile(name string) {
 func main() {
 	name := os.Args
 	if len(name) < 2 {
+		fmt.Println("没有找到参数")
 		return
 	}
 	printFile(string(name[1]))
