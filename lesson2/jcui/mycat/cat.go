@@ -1,9 +1,9 @@
 package main
 
 import (
-"fmt"
-"io/ioutil"
-"os"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
 
 func printFile(name string) {
@@ -21,7 +21,7 @@ func main() {
 		fmt.Println("没有找到文件")
 		return
 	}
-	for i := 1; i<len(name); i++{
+	for i := 1; i < len(name); i++ {
 		printFile(name[i])
 	}
 }
