@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
+"fmt"
+"io/ioutil"
+"os"
 )
 
 func printFile(name string) {
@@ -18,8 +18,10 @@ func printFile(name string) {
 func main() {
 	name := os.Args
 	if len(name) < 2 {
-		fmt.Println("没有找到参数")
+		fmt.Println("没有找到文件")
 		return
 	}
-	printFile(string(name[1]))
+	for i := 1; i<len(name); i++{
+		printFile(name[i])
+	}
 }
