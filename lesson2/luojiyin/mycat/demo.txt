@@ -1,0 +1,4 @@
+Pages 的上一个大更新中，加入了插入公式的功能，可以直接输入 LaTeX 或 MathML 来创建公式，解决了 iWork 系长久以来没有公式编辑器的困扰。但问题依然存在：不是每个人都掌握了 LaTeX 或 MathML，但又偶尔有输入公式的需求——这时，就要轮到被遗忘许久的 Grapher 登场了。
+
+I am using MacOS on the desktop and Ubuntu Linux on the server. I disabled root login over ssh and enabled ssh based public key login. However, I recently added second Ubuntu server. I need to sync file between two using rsync command. Is there any way that I can log from the second server into my first server with root user from second server IP address only ({root@secondBOX }# ssh root@firstBOX1) without reducing OpenSSH server security option?
+
