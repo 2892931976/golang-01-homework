@@ -16,6 +16,9 @@ func printFile(name string) {
 }
 
 func main() {
-
+	if len(os.Args) == 1 {
+		os.Exit(1)
+	}
 	printFile(os.Args[1])
+
 }
