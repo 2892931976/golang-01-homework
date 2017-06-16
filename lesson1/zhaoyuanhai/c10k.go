@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"time"
-	"log"
 )
 
 func handler1(conn net.Conn) {
@@ -12,7 +12,7 @@ func handler1(conn net.Conn) {
 	conn.Close()
 }
 
-func main()  {
+func main() {
 	l, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)
