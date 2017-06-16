@@ -1,12 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
-	"os"
 )
 
 func printFile(name string) {
+	fmt.Println(name)
 	buf, err := ioutil.ReadFile(name)
 	if err != nil {
 		fmt.Println(err)
@@ -16,12 +17,9 @@ func printFile(name string) {
 }
 
 func main() {
-	name := os.Args
-	if len(name) < 2 {
-		fmt.Println("没有找到文件")
-		return
-	}
-	for i := 1; i < len(name); i++ {
-		printFile(name[i])
+	flag.Parse()
+	for i := 0; i < len(flag.Args()); i++ {
+		// fmt.Println(len(flag.Args()))
+		printFile(flag.Arg(i))
 	}
 }

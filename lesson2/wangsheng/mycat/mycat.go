@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var i int
+
 func printFile(name string) {
 	buf, err := ioutil.ReadFile(name)
 	if err != nil {
@@ -13,15 +15,12 @@ func printFile(name string) {
 		return
 	}
 	fmt.Println(string(buf))
+
 }
 
 func main() {
-	name := os.Args
-	if len(name) < 2 {
-		fmt.Println("没有找到文件")
-		return
+	for i := 1; i < len(os.Args); i++ {
+		printFile(os.Args[i])
 	}
-	for i := 1; i < len(name); i++ {
-		printFile(name[i])
-	}
+
 }

@@ -16,12 +16,8 @@ func printFile(name string) {
 }
 
 func main() {
-	name := os.Args
-	if len(name) < 2 {
-		fmt.Println("没有找到文件")
-		return
-	}
-	for i := 1; i < len(name); i++ {
-		printFile(name[i])
+	for i := 1; i < len(os.Args); i++ {
+		fmt.Println("== ", os.Args[i], " ==")
+		printFile(os.Args[i])
 	}
 }

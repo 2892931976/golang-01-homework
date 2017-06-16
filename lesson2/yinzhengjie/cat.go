@@ -1,10 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
+	"fmt"
 	"os"
 )
+
+func main() {
+	var s string
+	for i := 1; i < len(os.Args); i++ {
+		s = os.Args[i]
+		printFile(s)
+	}
+	
+	fmt.Println("yinzhengjie")
+}
 
 func printFile(name string) {
 	buf, err := ioutil.ReadFile(name)
@@ -15,13 +25,4 @@ func printFile(name string) {
 	fmt.Println(string(buf))
 }
 
-func main() {
-	name := os.Args
-	if len(name) < 2 {
-		fmt.Println("没有找到文件")
-		return
-	}
-	for i := 1; i < len(name); i++ {
-		printFile(name[i])
-	}
-}
+
