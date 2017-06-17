@@ -16,8 +16,14 @@ func main() {
 	if true {
 		x := 100       //在if语段中定义新的局部变量x=100
 		fmt.Println(x) //输出调用x为100,if结束,变量失去作用
+		x = 10000
 	}
 
 	localFunc()    //调用全局变量x，输出为200
 	fmt.Println(x) //调用main语段中定义局部变量x,输出为1
+
+	if x == 1 {
+		x = 1000
+	}
+	fmt.Println(x)
 }
