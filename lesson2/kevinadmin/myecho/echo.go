@@ -1,13 +1,13 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"kevinadmin.org/golib"
 	golib2 "github.com/kevinadmin/golib"
+	"kevinadmin.org/golib"
+	"os"
 )
 
-func main (){
+func main() {
 	var s, sep string
 	for i := 1; i < len(os.Args); i++ {
 		s += sep + os.Args[i]
