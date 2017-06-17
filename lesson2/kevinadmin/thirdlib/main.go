@@ -5,6 +5,6 @@ import (
 	"github.com/icexin/golib"
 )
 
-func main()  {
+func main() {
 	fmt.Println(golib.Add(1, 2))
 }

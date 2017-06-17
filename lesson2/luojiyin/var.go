@@ -14,8 +14,8 @@ func main() {
 	localFunc()    //localFunc()是被调用的函数，是读取不到main()局部变量,只能读取到全局变量
 	fmt.Println(x) //
 	if true {
-		x := 100 //更新局部变量的值为100 他的作用域是if或者for 这样的控制流内部
-		fmt.Println(x)//if 外的局部变量x 的就恢复成 1
+		x := 100       //更新局部变量的值为100 他的作用域是if或者for 这样的控制流内部
+		fmt.Println(x) //if 外的局部变量x 的就恢复成 1
 	}
 
 	localFunc()    //localFunc()是被调用的函数，是读取不到main()局部变量,只能读取到全局变量
