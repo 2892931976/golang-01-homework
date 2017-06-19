@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-        "os"
+	"os"
 )
 
 func printFile(name string) {
@@ -16,10 +16,10 @@ func printFile(name string) {
 }
 
 func main() {
-    if len(os.Args) != 2 {
-        fmt.Println("need  file name")
-        return
-    }
-    file := os.Args[1]
-    printFile(file)
+	if len(os.Args) != 2 {
+		fmt.Println("need  file name")
+		return
+	}
+	file := os.Args[1]
+	printFile(file)
 }
