@@ -35,10 +35,14 @@ func main() {
 }
 
 func listAllProcs() (ps []*Proc, err error) {
-	var dirs []string
+	// initial slice ps
+	ps = make([]*Proc, 0)
+
 	dirSpec := "/proc"
 	// mac test
 	// dirSpec := "./proc"
+
+	var dirs []string
 	dirs, err = listDirsUnderDir(dirSpec)
 	if err != nil {
 		return
