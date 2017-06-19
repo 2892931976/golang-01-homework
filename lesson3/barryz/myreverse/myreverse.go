@@ -7,7 +7,7 @@ import (
 
 func main() {
 	strs := os.Args[1]
-	nbyte := []byte(strs)
+	nbyte := []rune(strs)
 	sz := len(nbyte)
 
 	for i, j := 0, sz-1; i < j; i, j = i+1, j-1 {
