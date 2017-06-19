@@ -14,14 +14,14 @@ func main() {
 
 	x, err := strconv.Atoi(os.Args[1])
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	y, err := strconv.Atoi(os.Args[3])
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	switch os.Args[2] {
