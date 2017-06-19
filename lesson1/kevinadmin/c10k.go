@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"time"
-	"log"
 )
 
-func handle(conn net.Conn){
+func handle(conn net.Conn) {
 	fmt.Fprintf(conn, "%s", time.Now().String())
 	conn.Close()
 }
 
-func main (){
+func main() {
 	l, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)

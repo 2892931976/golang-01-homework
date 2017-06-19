@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request)  {
-	fmt.Fprint(w,"Welcome to YinZhengjie's home page!")
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Welcome to YinZhengjie's home page!")
 }
 
-func main()  {
-	http.HandleFunc("/",handler)
-	http.ListenAndServe(":8080",nil)
+func main() {
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":8080", nil)
 }
