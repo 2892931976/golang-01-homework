@@ -16,9 +16,7 @@ func catFile(pid string, fileName string) {
 		return
 	}
 	s = string(buf)
-	if len(s) == 0 {
-		//如果cmdline为空则不打印
-	} else {
+	if len(s) > 0 {
 		fmt.Printf("%v\t%v\n", pid, s)
 	}
 }
@@ -32,7 +30,7 @@ func main() {
 	infos, _ := f.Readdir(-1)
 	for _, info := range infos {
 		_, err := strconv.Atoi(info.Name())
-		if info.IsDir() && err == nil {
+		if info.IsDir() && err == nil { //判断是否为目录，并且转换成int类型时无报错
 			fileName = "/proc/" + info.Name() + "/cmdline"
 			catFile(info.Name(), fileName)
 		}
