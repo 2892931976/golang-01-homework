@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
@@ -12,7 +12,7 @@ func main() {
 		s = os.Args[i]
 		printFile(s)
 	}
-	
+
 	fmt.Println("yinzhengjie")
 }
 
@@ -24,5 +24,3 @@ func printFile(name string) {
 	}
 	fmt.Println(string(buf))
 }
-
-
