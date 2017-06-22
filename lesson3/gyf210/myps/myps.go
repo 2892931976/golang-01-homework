@@ -1,50 +1,35 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
-	"os"
+	"sort"
 	"strconv"
 )
 
 func main() {
-	f1, err := os.Open("/proc")
+	var pids []int
+	files, err := ioutil.ReadDir("/proc")
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
+	for _, file := range files {
+		n, err := strconv.Atoi(file.Name())
+		if err != nil {
+			continue
+		}
+		pids = append(pids, n)
+	}
+	sort.Ints(pids)
 
 	fmt.Println("PID\tCMD")
-	infos, _ := f1.Readdir(-1)
-	for _, info := range infos {
-		_, err := strconv.Atoi(info.Name())
+	for _, pid := range pids {
+		filename := fmt.Sprintf("%v/%v/%v", "/proc", pid, "cmdline")
+		data, err := ioutil.ReadFile(filename)
 		if err != nil {
 			continue
 		}
-		f2, err := os.Open("/proc/" + info.Name())
-		if err != nil {
-			continue
-		}
-		infos1, _ := f2.Readdir(-1)
-		for _, info1 := range infos1 {
-			if info1.Name() == "cmdline" {
-				f3, err := os.Open("/proc/" + info.Name() + "/cmdline")
-				if err == nil {
-					r := bufio.NewReader(f3)
-					for {
-						line, err := r.ReadString('\n')
-						fmt.Printf("%v\t%v\n", info.Name(), line)
-						if err == io.EOF {
-							break
-						}
-					}
-				}
-				f3.Close()
-			}
-		}
-		f2.Close()
+		fmt.Printf("%v\t%v\n", pid, string(data))
 	}
-	f1.Close()
 }
