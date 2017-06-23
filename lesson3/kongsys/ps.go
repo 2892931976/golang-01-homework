@@ -26,8 +26,7 @@ func main() {
 				r := bufio.NewReader(f)
 				line, _ := r.ReadString('\n')
 				statslice := strings.Split(line, " ")
-				tempL := len(statslice[1])
-				app := statslice[1][1 : tempL-1] // delete '(' and  ')', origin app like "(sshd)"
+				app := statslice[1][1 : len(statslice[1])-1] // delete '(' and  ')', origin app like "(sshd)"
 				fmt.Println(app, d.Name())
 			}
 		}
