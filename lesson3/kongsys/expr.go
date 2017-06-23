@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func main() {
-	m := 10
-	n := 3
-	if len(os.Args) == 2 {
-		switch os.Args[1] {
+	if len(os.Args) == 4 {
+		m := convert(os.Args[1])
+		n := convert(os.Args[3])
+		switch os.Args[2] {
 		case "+":
 			fmt.Println(m + n)
 		case "-":
@@ -23,6 +24,15 @@ func main() {
 			fmt.Println("unkown operator")
 		}
 	} else {
-		fmt.Println("need operator")
+		fmt.Println("parameter not enough.")
 	}
+}
+
+func convert(s string) int {
+	temp, err := strconv.Atoi(s)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "type convert error.")
+		os.Exit(1)
+	}
+	return temp
 }
