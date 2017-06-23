@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
-	"io/ioutil"
 )
 
 func psfile(pid, filename string) {
