@@ -10,10 +10,8 @@ func Reverse(origin string) string {
 		return origin
 	}
 	buf := []byte(origin)
-	for sta, mid, end := 0, sLen/2, sLen-1; sta < mid; sta++ {
+	for sta, mid, end := 0, sLen/2, sLen-1; sta < mid; sta, end = sta+1, end-1 {
 		buf[sta], buf[end] = buf[end], buf[sta]
-		// sta++
-		end--
 	}
 	return string(buf)
 }
