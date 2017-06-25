@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func myslice(s []int) {
@@ -10,10 +11,12 @@ func myslice(s []int) {
 	}
 }
 
-func mystring(s []byte) {
+func mystring(str string) string {
+	s := strings.Fields(str)
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
+	return strings.Join(s, " ")
 }
 
 func main() {
@@ -27,7 +30,5 @@ func main() {
 
 	str := "hello world"
 	fmt.Println(str)
-	b := []byte(str)
-	mystring(b)
-	fmt.Println(string(b))
+	fmt.Println(mystring(str))
 }
