@@ -1,0 +1,2 @@
+hellohello
+my string is: hello n=4
