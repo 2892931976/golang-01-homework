@@ -30,9 +30,9 @@ func main() {
 	myreverse(text, v)
 
 	var text1 = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
-	v1 := 3
+	v1 := 5
 	myreverse(text1, v1)
 
-	var word = "hello world one two"
+	var word = "hello world one two 三"
 	reverse_word(word)
 }

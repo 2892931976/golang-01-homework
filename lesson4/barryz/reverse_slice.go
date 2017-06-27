@@ -15,8 +15,8 @@ func main() {
 	a := []int{2, 3, 5, 6, 7, 8}
 	target := 2
 
-	if target > len(a) {
-		fmt.Println("target greater than the params's length.")
+	if target > len(a) || target < 0 {
+		fmt.Println("target was invalid")
 		os.Exit(1)
 	}
 
