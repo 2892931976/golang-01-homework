@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -25,7 +26,12 @@ func main() {
 		fmt.Print("> ")
 		line, _ = f.ReadString('\n')
 		line = strings.Replace(line, "\n", "", 1)
-		fmt.Sscan(line, &cmd, &name, &id)
+		_, err := fmt.Sscan(line, &cmd, &name, &id)
+		// EOF for no enough space-separated values, like `list` cmd
+		if err != nil && err != io.EOF {
+			fmt.Println(" + parse cmd or info err:", err)
+			continue
+		}
 		if cmd == "exit" {
 			break
 		}
