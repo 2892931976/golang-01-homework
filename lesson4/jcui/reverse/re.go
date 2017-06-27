@@ -33,6 +33,6 @@ func main() {
 	v1 := 3
 	myreverse(text1, v1)
 
-	var word = "hello world one two"
+	var word = "hello world one two 三"
 	reverse_word(word)
 }
