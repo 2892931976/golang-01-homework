@@ -31,10 +31,7 @@ func main() {
 			}
 		case "add":
 			fmt.Sscan(line, &cmd, &name, &id)
-			stuinfo[name] = Student{
-				Id:   id,
-				Name: name,
-			}
+			stuinfo[name] = Student{Id: id, Name: name}
 			fmt.Println("add done")
 		case "save":
 			w, err := json.Marshal(stuinfo)
