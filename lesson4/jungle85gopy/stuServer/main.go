@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 )
@@ -22,6 +21,8 @@ var students = make(map[string]Student)
 func main() {
 	var line, cmd, name string
 	var id int
+	saved := true
+
 	f := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -38,46 +39,57 @@ func main() {
 		}
 		switch cmd {
 		case "add":
-			addStu(name, id)
+			if addStu(name, id) {
+				saved = false
+			}
 		case "list":
 			listStu()
 		case "load":
-			loadStu(name)
+			if loadStu(name, saved) {
+				saved = true
+			}
 		case "save":
-			saveStu(name)
+			if saveStu(name) {
+				saved = true
+			}
 		case "":
 			continue
 		default:
 			usage()
 		}
-		line, cmd = "", ""
+		line, cmd, name = "", "", ""
 	}
 }
 
-func saveStu(name string) {
+func saveStu(name string) (rt bool) {
 	var err error
 	var fd *os.File
 
 	// file existed and override
 	if checkFileExist(name) {
-		if !checkOverride(name) {
+		if !checkYes(fmt.Sprintf("override file %s", name)) {
 			fmt.Println(" + cancel save to", name)
 			return
 		}
 		if fd, err = os.OpenFile(name, os.O_RDWR|os.O_TRUNC, 0644); err != nil {
-			log.Fatal("open file error of %s", name)
+			fmt.Printf(" + open file error of %s\n", name)
+			return
 		}
 	}
 	// save to new file
 	if fd, err = os.Create(name); err != nil {
-		log.Fatal("open new file error of %s", name)
+		fmt.Printf(" + open new file error of %s\n", name)
+		return
 	}
 	if buf, err := json.Marshal(students); err != nil {
-		log.Fatal("marshal stu info error")
+		fmt.Println(" + marshal stu info error")
+		return
 	} else if _, err := fd.Write(buf); err == nil {
 		fmt.Println(" + save success")
+		return true
 	} else {
-		log.Fatal("save error")
+		fmt.Println(" + save error")
+		return
 	}
 }
 
@@ -91,11 +103,11 @@ func checkFileExist(f string) bool {
 	return false
 }
 
-// check override the give file name
-func checkOverride(f string) bool {
+// check yes or no for the give question
+func checkYes(f string) bool {
 	var s string
 	for {
-		fmt.Printf(" + override file: %s, y or n? :", f)
+		fmt.Printf(" + %s, y or n? :", f)
 		fmt.Scanf("%s", &s)
 		if string(s[0]) == "y" || string(s[0]) == "Y" {
 			return true
@@ -105,30 +117,40 @@ func checkOverride(f string) bool {
 	}
 }
 
-func loadStu(name string) {
+func loadStu(name string, saved bool) (rt bool) {
 	var err error
 	var buf []byte
 	if !checkFileExist(name) {
-		fmt.Printf(" + %s not existed!\n", name)
+		fmt.Printf(" + file : %s not existed!\n", name)
+		return
+	}
+	if !saved && !checkYes("clear up stu info in mem for load") {
+		fmt.Println(" + give up load!")
 		return
 	}
 	if buf, err = ioutil.ReadFile(name); err != nil {
-		log.Printf("read from file error of %s\n", name)
+		fmt.Printf("read from file error of %s\n", name)
 		return
 	}
 	if err = json.Unmarshal(buf, &students); err != nil {
-		log.Print(err)
+		fmt.Print(err)
 		return
 	}
 	fmt.Println(" + load success")
+	return true
 }
 
-func addStu(name string, id int) {
+func addStu(name string, id int) (rt bool) {
 	if _, ok := students[name]; ok {
-		fmt.Println(" + duplicated name:", name)
+		fmt.Printf(" + duplicated name: %s\n", name)
 		return
 	}
 	students[name] = Student{ID: id, Name: name}
+	if _, ok := students[name]; ok {
+		fmt.Println(" + add success!")
+		return true
+	}
+	return
 }
 
 func listStu() {
