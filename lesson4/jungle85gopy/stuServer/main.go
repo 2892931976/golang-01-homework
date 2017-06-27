@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -105,7 +106,21 @@ func checkOverride(f string) bool {
 }
 
 func loadStu(name string) {
-	fmt.Println("params:", name)
+	var err error
+	var buf []byte
+	if !checkFileExist(name) {
+		fmt.Printf(" + %s not existed!\n", name)
+		return
+	}
+	if buf, err = ioutil.ReadFile(name); err != nil {
+		log.Printf("read from file error of %s\n", name)
+		return
+	}
+	if err = json.Unmarshal(buf, &students); err != nil {
+		log.Print(err)
+		return
+	}
+	fmt.Println(" + load success")
 }
 
 func addStu(name string, id int) {
