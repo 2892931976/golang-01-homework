@@ -67,7 +67,7 @@ func main() {
 			}
 			fmt.Printf("load %v successful! \n", filename)
 		default:
-			fmt.Println("go...")
+			fmt.Println("go ...")
 		}
 	}
 }
