@@ -101,26 +101,28 @@ func Load(fileName string) (stu *StudentSet, err error) {
 
 func main() {
 
-	var cmd string
-	var name string
-	var file string
-	var id int
-	var line string
-	var err error
-	stu := NewStudentSets()
-	f := bufio.NewReader(os.Stdin)
+	var (
+		cmd  string
+		name string
+		file string
+		id   int
+		line string
+		err  error
+	)
 
-	//var students map[string]Student
+	f := bufio.NewReader(os.Stdin)
+	stus := NewStudentSets()
+
 	for {
 		fmt.Print("> ")
 		line, _ = f.ReadString('\n')
 		fmt.Sscan(line, &cmd)
 		switch cmd {
 		case "list":
-			fmt.Println(stu)
+			fmt.Println(stus)
 		case "add":
 			fmt.Sscan(line, &cmd, &name, &id)
-			err = stu.Add(id, name)
+			err = stus.Add(id, name)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -128,7 +130,7 @@ func main() {
 			}
 		case "save":
 			fmt.Sscan(line, &cmd, &file)
-			err = Dump(file, stu)
+			err = Dump(file, stus)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -136,7 +138,7 @@ func main() {
 			}
 		case "load":
 			fmt.Sscan(line, &cmd, &file)
-			stu, err = Load(file)
+			stus, err = Load(file)
 			if err != nil {
 				fmt.Println(err)
 			} else {
