@@ -34,9 +34,6 @@ func main() {
 			fmt.Println(" + parse cmd or info err:", err)
 			continue
 		}
-		if cmd == "exit" {
-			break
-		}
 		switch cmd {
 		case "add":
 			if addStu(name, id) {
@@ -52,13 +49,23 @@ func main() {
 			if saveStu(name) {
 				saved = true
 			}
+		case "exit":
+			exitStu(saved)
 		case "":
+			// no show usage() when ENTER
 			continue
 		default:
 			usage()
 		}
 		line, cmd, name = "", "", ""
 	}
+}
+
+func exitStu(s bool) {
+	if !s && checkYes("exit with saving stu info") {
+		os.Exit(0)
+	}
+	return
 }
 
 func saveStu(name string) (rt bool) {
