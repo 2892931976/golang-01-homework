@@ -37,6 +37,7 @@ func NewStudentSets() *StudentSet {
 	return &StudentSet{M: make(map[string]*Student, 0)}
 }
 
+// Add student info
 func (s *StudentSet) Add(id int, name string) (err error) {
 	_, ok := s.M[name]
 	if ok {
@@ -49,7 +50,7 @@ func (s *StudentSet) Add(id int, name string) (err error) {
 	return
 }
 
-// list list all student information as a string
+// list all students info as a string
 func (s *StudentSet) list() string {
 	var str string = "Id\t\tName\n"
 	for k, v := range s.M {
@@ -58,12 +59,25 @@ func (s *StudentSet) list() string {
 	return str
 }
 
-// String implements string method
+// Remove student that specified
+func (s *StudentSet) Remove(name string) {
+	_, ok := s.M[name]
+	if ok {
+		delete(s.M, name)
+	}
+}
+
+// Clear all students info
+func (s *StudentSet) Clear() {
+	s.M = make(map[string]*Student, 0)
+}
+
+// String implements String method
 func (s *StudentSet) String() string {
 	return s.list()
 }
 
-// Dump student info to the file that specified
+// Dump students info to the file that specified
 func Dump(fileName string, stu *StudentSet) (err error) {
 	fd, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -84,7 +98,7 @@ func Dump(fileName string, stu *StudentSet) (err error) {
 	return
 }
 
-// Load student info to the file that specified
+// Load students info to the file that specified
 func Load(fileName string) (stu *StudentSet, err error) {
 	bs, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -144,10 +158,18 @@ func main() {
 			} else {
 				fmt.Printf("load student info from %s done\n", file)
 			}
+		case "remove":
+			fmt.Sscan(line, &cmd, &name)
+			stus.Remove(name)
+			fmt.Printf("remove student %s done\n", name)
+		case "clear":
+			fmt.Sscan(line, &cmd)
+			stus.Clear()
+			fmt.Printf("clear all students info %s done\n")
 		case "exit", "quit", "q":
 			os.Exit(0)
 		default:
-			fmt.Println("list|add|save|load|exit")
+			fmt.Println("Usage: list|add|save|load|remove|clear|exit")
 		}
 	}
 
