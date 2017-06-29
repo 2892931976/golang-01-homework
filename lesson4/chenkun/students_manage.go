@@ -60,8 +60,7 @@ func main() {
 				fmt.Println(err)
 				break
 			}
-			bf := []byte(filebuf)                    // string 转换成 byte
-			jsonerr := json.Unmarshal(bf, &students) // 反序列化，json转换成map
+			jsonerr := json.Unmarshal(filebuf, &students) // 反序列化，json转换成map
 			if jsonerr != nil {
 				fmt.Println(jsonerr)
 			}
