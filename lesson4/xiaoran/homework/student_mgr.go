@@ -68,7 +68,7 @@ func main() {
 			}
 
 			j_err := json.Unmarshal(f, &stu_info)
-			if err != nil {
+			if j_err != nil {
 				log.Fatal("Unmarshal err :%s", j_err)
 			}
 
