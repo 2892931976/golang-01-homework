@@ -62,6 +62,24 @@ func List(sroom []map[string]Student) {
 	}
 }
 
+func ValidExits(classroom []map[string]Student, name string) bool {
+	fmt.Println(len(classroom))
+	if len(classroom) == 0 {
+		return false
+	}
+	for _, m := range classroom {
+		for _, info := range m {
+			fmt.Println(info.Name, name)
+			if name == info.Name {
+				fmt.Println("err")
+				return true
+			}
+		}
+	}
+	return false
+
+}
+
 func main() {
 	var cmd string
 	var name string
@@ -81,7 +99,13 @@ func main() {
 			stu.Name = name
 			students = make(map[string]Student)
 			students[name] = stu
+
+			if ValidExits(classroom, name) {
+				fmt.Printf("name:%v already exists\n", name)
+				continue
+			}
 			classroom = append(classroom, students)
+
 		case "list":
 			List(classroom)
 		case "save":
