@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -75,6 +76,26 @@ func main() {
 
 		case "load":
 			fmt.Sscan(line, &cmd, &filename)
+			f, err := os.Open(filename)
+			if err != nil {
+				log.Fatal(err)
+			}
+			r := bufio.NewReader(f)
+			fmt.Println("姓名 编号")
+			for {
+				line, err := r.ReadString('\n')
+				if err == io.EOF {
+					break
+				}
+				//fmt.Print(line)
+				var s Student
+				err1 := json.Unmarshal([]byte(line), &s)
+				if err1 != nil {
+					log.Fatalf("unmarshal error:%s", err)
+				}
+				fmt.Printf("%s %d\n", s.Name, s.Id)
+				//fmt.Println(s)
+			}
 
 		case "exit":
 			os.Exit(0)
