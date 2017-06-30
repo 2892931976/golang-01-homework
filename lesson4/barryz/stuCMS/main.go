@@ -113,14 +113,25 @@ func Load(fileName string) (stu *StudentSet, err error) {
 	return
 }
 
+func errorHandler(err error) bool {
+	var ok bool = true
+	if err != nil {
+		ok = false
+		fmt.Println(err.Error())
+		return ok
+	}
+	return ok
+}
+
 func main() {
 
 	var (
+		ok   bool
 		cmd  string
 		name string
 		file string
-		id   int
 		line string
+		id   int
 		err  error
 	)
 
@@ -134,40 +145,41 @@ func main() {
 		switch cmd {
 		case "list":
 			fmt.Println(stus)
+
 		case "add":
 			fmt.Sscan(line, &cmd, &name, &id)
 			err = stus.Add(id, name)
-			if err != nil {
-				fmt.Println(err)
-			} else {
+			if ok = errorHandler(err); ok {
 				fmt.Printf("add done.\n")
 			}
+
 		case "save":
 			fmt.Sscan(line, &cmd, &file)
 			err = Dump(file, stus)
-			if err != nil {
-				fmt.Println(err)
-			} else {
+			if ok = errorHandler(err); ok {
 				fmt.Printf("save student info to %s done\n", file)
 			}
+
 		case "load":
 			fmt.Sscan(line, &cmd, &file)
 			stus, err = Load(file)
-			if err != nil {
-				fmt.Println(err)
-			} else {
+			if ok = errorHandler(err); ok {
 				fmt.Printf("load student info from %s done\n", file)
 			}
+
 		case "remove":
 			fmt.Sscan(line, &cmd, &name)
 			stus.Remove(name)
 			fmt.Printf("remove student %s done\n", name)
+
 		case "clear":
 			fmt.Sscan(line, &cmd)
 			stus.Clear()
-			fmt.Printf("clear all students info %s done\n")
+			fmt.Printf("clear all students info done\n")
+
 		case "exit", "quit", "q":
 			os.Exit(0)
+
 		default:
 			fmt.Println("Usage: list|add|save|load|remove|clear|exit")
 		}
