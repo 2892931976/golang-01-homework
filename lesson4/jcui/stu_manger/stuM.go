@@ -29,15 +29,19 @@ func main() {
 			for _, v := range stuinfo {
 				fmt.Println(v.Name, v.Id)
 			}
-		case "add":
+		case "add": //add的时候没有去重
 			fmt.Sscan(line, &cmd, &name, &id)
+			if _, ok := stuinfo[name]; ok {
+				fmt.Println("name is exits")
+				continue
+			}
 			stuinfo[name] = Student{Id: id, Name: name}
 			fmt.Println("add done")
 		case "save":
 			w, err := json.Marshal(stuinfo)
 			if err != nil {
 				fmt.Println("save faile")
-				return
+				continue
 			}
 			ioutil.WriteFile("list.db", w, 0400)
 			fmt.Println("save ok")
@@ -45,7 +49,7 @@ func main() {
 			f, err := ioutil.ReadFile("list.db")
 			if err != nil {
 				fmt.Println("load faile")
-				return
+				continue
 			}
 			json.Unmarshal(f, &stuinfo)
 			fmt.Println("load ok")
