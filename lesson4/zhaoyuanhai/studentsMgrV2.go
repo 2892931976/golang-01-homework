@@ -32,12 +32,13 @@ func main() {
 		}
 		switch cmd {
 		case "list":
-			for k, v := range m {
-				fmt.Printf("Name: %-10s %v\n", k, v)
+			for _, v := range m {
+				fmt.Printf("Name: %-10s %v\n", v.Name, v.Age)
 			}
 
 		case "add":
 			fmt.Sscan(line, &cmd, &name, &age)
+
 			if m[name].Name != "" {
 				fmt.Println("学生已存在")
 				continue
@@ -52,11 +53,7 @@ func main() {
 
 		case "load":
 			fmt.Sscan(line, &cmd, &file)
-			result := studentLoad(file)
-			for _, info := range result { //遍历学生信息
-				//	fmt.Printf("Name: %-10s Age: %d\n", result[name].Name, result[name].Age)
-				fmt.Printf("Name: %-10s Age: %d\n", info.Name, info.Age) //打印到控制台
-			}
+			m = studentLoad(file)
 		}
 	}
 }
