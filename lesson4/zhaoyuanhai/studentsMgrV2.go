@@ -53,13 +53,7 @@ func main() {
 
 		case "load":
 			fmt.Sscan(line, &cmd, &file)
-			result := studentLoad(file)
-			for name, info := range result { //遍历学生信息
-				//	fmt.Printf("Name: %-10s Age: %d\n", result[name].Name, result[name].Age)
-				//fmt.Printf("Name: %-10s Age: %d\n", info.Name, info.Age) //打印到控制台
-				m[name] = info
-
-			}
+			m = studentLoad(file)
 		}
 	}
 }
