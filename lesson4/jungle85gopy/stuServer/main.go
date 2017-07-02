@@ -62,7 +62,7 @@ func main() {
 }
 
 func exitStu(s bool) {
-	if !s && checkYes("exit with saving stu info") {
+	if s || checkYes("exit with saving stu info") {
 		os.Exit(0)
 	}
 	return
@@ -82,12 +82,14 @@ func saveStu(name string) (rt bool) {
 			fmt.Printf(" + open file error of %s\n", name)
 			return
 		}
+		defer fd.Close()
 	}
 	// save to new file
 	if fd, err = os.Create(name); err != nil {
 		fmt.Printf(" + open new file error of %s\n", name)
 		return
 	}
+	defer fd.Close()
 	if buf, err := json.Marshal(students); err != nil {
 		fmt.Println(" + marshal stu info error")
 		return
@@ -173,7 +175,7 @@ func listStu() {
 
 func usage() {
 	fmt.Println(" + cli usage:")
-	fmt.Println(" + add name id -- add student info")
+	fmt.Println(" + add name id  -- add student info")
 	fmt.Println(" + list \t-- list student info")
 	fmt.Println(" + load file \t-- load student from file")
 	fmt.Println(" + save file \t-- save student info file")
