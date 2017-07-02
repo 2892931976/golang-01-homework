@@ -43,7 +43,6 @@ func main() {
 		}
 		actionFunc, ok := actionMap[cmd]
 		if !ok {
-			printInfo(fmt.Sprintf("bad cmd : %s", cmd))
 			usage()
 			continue
 		}
@@ -57,7 +56,7 @@ func main() {
 }
 
 func parseCmd(f *bufio.Reader) (cmd string, args []string) {
-	printInfo(fmt.Sprintf("saved value: %v", saved))
+	// printInfo(fmt.Sprintf("saved value: %v", saved))
 	fmt.Print("> ")
 	line, _ := f.ReadString('\n')
 	line = strings.TrimSpace(line)
@@ -71,7 +70,6 @@ func parseCmd(f *bufio.Reader) (cmd string, args []string) {
 }
 
 func addInfo(args []string) error {
-	printInfo("call add, args: " + strings.Join(args, ", "))
 	if len(args) <= 1 {
 		return fmt.Errorf("args not enougth")
 	}
@@ -81,11 +79,11 @@ func addInfo(args []string) error {
 		return fmt.Errorf("error params for id")
 	}
 	if _, ok := stuMap[name]; ok {
-		return fmt.Errorf("duplicated name: " + name)
+		return fmt.Errorf("duplicated name: %s", name)
 	}
 	stuMap[name] = &Student{ID: id, Name: name}
 	if _, ok := stuMap[name]; !ok {
-		return fmt.Errorf("add %s failed!" + name)
+		return fmt.Errorf("add %s failed", name)
 	}
 	saved = false
 	return nil
@@ -95,9 +93,9 @@ func listInfo(args []string) error {
 	if len(stuMap) == 0 {
 		return fmt.Errorf("no student info here")
 	}
-	fmt.Println(" + Id\tName:")
+	fmt.Println("\tId\tName:")
 	for _, val := range stuMap {
-		fmt.Printf(" + %d\t%s\n", val.ID, val.Name)
+		fmt.Printf("\t%d\t%s\n", val.ID, val.Name)
 	}
 	return nil
 }
@@ -112,16 +110,16 @@ func saveInfo(args []string) error {
 	// file existed and override
 	if checkFileExist(name) {
 		if !checkYes(fmt.Sprintf("override file %s", name)) {
-			return fmt.Errorf("cancel save to file " + name)
+			return fmt.Errorf("cancel save to file %s", name)
 		}
 		if fd, err = os.OpenFile(name, os.O_RDWR|os.O_TRUNC, 0644); err != nil {
-			return fmt.Errorf("open file error of " + name)
+			return fmt.Errorf("open file error of %s", name)
 		}
 		defer fd.Close()
 	}
 	// save to new file
 	if fd, err = os.Create(name); err != nil {
-		return fmt.Errorf("open new file error of " + name)
+		return fmt.Errorf("open new file error of %s", name)
 	}
 	defer fd.Close()
 
@@ -146,7 +144,7 @@ func loadInfo(args []string) error {
 	}
 	name := args[0]
 	if !checkFileExist(name) {
-		return fmt.Errorf(name + " not existed")
+		return fmt.Errorf("%s not existed", name)
 	}
 	if !saved && !checkYes("clear up stu info in mem for load") {
 		return fmt.Errorf("give up load")
@@ -163,7 +161,6 @@ func loadInfo(args []string) error {
 }
 
 func updateInfo(args []string) error {
-	printInfo("call update, args: " + strings.Join(args, ", "))
 	if len(args) <= 1 {
 		return fmt.Errorf("args not enougth")
 	}
@@ -177,14 +174,14 @@ func updateInfo(args []string) error {
 	}
 	stuMap[name].ID = id
 	if stuMap[name].ID != id {
-		return fmt.Errorf("update failed for " + name)
+		return fmt.Errorf("update failed for %s", name)
 	}
+	printInfo("update success")
 	saved = false
 	return nil
 }
 
 func deleteInfo(args []string) error {
-	printInfo("call delete, args: " + strings.Join(args, ", "))
 	if len(args) <= 1 {
 		return fmt.Errorf("args need to be NAME ID")
 	}
@@ -202,8 +199,9 @@ func deleteInfo(args []string) error {
 	}
 	delete(stuMap, name)
 	if _, ok := stuMap[name]; ok {
-		return fmt.Errorf("delete failed for " + name)
+		return fmt.Errorf("delete failed for %s", name)
 	}
+	printInfo("delete success")
 	saved = false
 	return nil
 }
