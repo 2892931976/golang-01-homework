@@ -17,16 +17,22 @@ type Student struct {
 	Name string `json:"name"`
 }
 
-var stuMap = make(map[string]Student)
+// original stuMap map from string to Student
+// new stuMap map from string to *Student for error: cannot assign
+// refer: https://stackoverflow.com/questions/32751537/
+//   why-do-i-get-a-cannot-assign-error-when-setting-value-to-a-struct-as-a-value-i
+var stuMap = make(map[string]*Student)
 var saved bool
 
 func main() {
 	actionMap := map[string]func([]string) error{
-		"add":  addInfo,
-		"list": listInfo,
-		"save": saveInfo,
-		"load": loadInfo,
-		"exit": exitInfo,
+		"add":    addInfo,
+		"list":   listInfo,
+		"save":   saveInfo,
+		"load":   loadInfo,
+		"update": updateInfo,
+		"delete": deleteInfo,
+		"exit":   exitInfo,
 	}
 	saved = true
 	f := bufio.NewReader(os.Stdin)
@@ -77,7 +83,7 @@ func addInfo(args []string) error {
 	if _, ok := stuMap[name]; ok {
 		return fmt.Errorf("duplicated name: " + name)
 	}
-	stuMap[name] = Student{ID: id, Name: name}
+	stuMap[name] = &Student{ID: id, Name: name}
 	if _, ok := stuMap[name]; !ok {
 		return fmt.Errorf("add %s failed!" + name)
 	}
@@ -153,6 +159,52 @@ func loadInfo(args []string) error {
 	}
 	printInfo("load success")
 	saved = true
+	return nil
+}
+
+func updateInfo(args []string) error {
+	printInfo("call update, args: " + strings.Join(args, ", "))
+	if len(args) <= 1 {
+		return fmt.Errorf("args not enougth")
+	}
+	name := args[0]
+	id, err := strconv.Atoi(args[1])
+	if err != nil {
+		return fmt.Errorf("error params for id")
+	}
+	if _, ok := stuMap[name]; !ok {
+		return fmt.Errorf("%s not exist", name)
+	}
+	stuMap[name].ID = id
+	if stuMap[name].ID != id {
+		return fmt.Errorf("update failed for " + name)
+	}
+	saved = false
+	return nil
+}
+
+func deleteInfo(args []string) error {
+	printInfo("call delete, args: " + strings.Join(args, ", "))
+	if len(args) <= 1 {
+		return fmt.Errorf("args need to be NAME ID")
+	}
+	name := args[0]
+	stu, ok := stuMap[name]
+	if !ok {
+		return fmt.Errorf("%s not exist", name)
+	}
+	id, err := strconv.Atoi(args[1])
+	if err != nil {
+		return fmt.Errorf("error params for id")
+	}
+	if stu.ID != id || stu.Name != name {
+		return fmt.Errorf("given info not matched")
+	}
+	delete(stuMap, name)
+	if _, ok := stuMap[name]; ok {
+		return fmt.Errorf("delete failed for " + name)
+	}
+	saved = false
 	return nil
 }
 
