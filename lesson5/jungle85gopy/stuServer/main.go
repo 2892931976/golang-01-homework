@@ -26,8 +26,9 @@ func main() {
 		"list": listInfo,
 		"save": saveInfo,
 		"load": loadInfo,
+		"exit": exitInfo,
 	}
-
+	saved = true
 	f := bufio.NewReader(os.Stdin)
 	for {
 		cmd, args := parseCmd(f)
@@ -152,6 +153,13 @@ func loadInfo(args []string) error {
 	}
 	printInfo("load success")
 	saved = true
+	return nil
+}
+
+func exitInfo(args []string) error {
+	if saved || checkYes("exit with saving stu info") {
+		os.Exit(0)
+	}
 	return nil
 }
 
