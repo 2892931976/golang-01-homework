@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,31 +9,24 @@ import (
 	"strings"
 )
 
-func execFunc(s string) error {
-	args := strings.Fields(s)
-	if len(args) == 0 {
-		return errors.New("command error")
-	}
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func execPipeFunc(s string) error {
-	args := strings.Split(s, "|")
+func argsFunc(s string) []*exec.Cmd {
 	var cmdSlice []*exec.Cmd
+	n := strings.Index(s, "|")
+	if n == -1 {
+		args := strings.Fields(s)
+		cmdSlice = append(cmdSlice, exec.Command(args[0], args[1:]...))
+		return cmdSlice
+	}
+	args := strings.Split(s, "|")
 	for _, v := range args {
 		cmd := strings.Fields(v)
 		cmdSlice = append(cmdSlice, exec.Command(cmd[0], cmd[1:]...))
 	}
-	pipeSlice := make([]*io.PipeWriter, len(cmdSlice)-1)
+	return cmdSlice
+}
 
+func execFunc(cmdSlice []*exec.Cmd) error {
+	pipeSlice := make([]*io.PipeWriter, len(cmdSlice)-1)
 	i := 0
 	for ; i < len(cmdSlice)-1; i++ {
 		r, w := io.Pipe()
@@ -77,7 +69,7 @@ func callFunc(cmdSlice []*exec.Cmd, pipeSlice []*io.PipeWriter) error {
 
 func main() {
 	host, _ := os.Hostname()
-	prompt := fmt.Sprintf("[test@%s]$ ", host)
+	prompt := fmt.Sprintf("[TEST@%s]$ ", host)
 	r := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print(prompt)
@@ -92,17 +84,10 @@ func main() {
 			continue
 		}
 
-		n := strings.Index(line, "|")
-		if n == -1 {
-			err := execFunc(line)
-			if err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			err := execPipeFunc(line)
-			if err != nil {
-				fmt.Println(err)
-			}
+		cmdSlice := argsFunc(line)
+		err := execFunc(cmdSlice)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 }
