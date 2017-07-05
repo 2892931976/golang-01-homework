@@ -15,38 +15,94 @@ type Student struct {
 	Name string
 }
 
+var DBfile = "info"
+var studentInfo []string
+
 func add(args []string) error {
 	fmt.Println("call add")
 	fmt.Println("args", args)
-	//if len(args) != 3
-	/*
-		name := args[0]
-		id := args[1]
-	*/
-	// ....
+	if len(args) == 2 {
+		for _, line := range studentInfo {
+			studentId := strings.Fields(line)
+			if len(studentId) > 0 && studentId[0] == args[0] {
+				return errors.New("The student is exits")
+			}
+		}
+
+	}
+	temp := strings.Join(args, " ")
+	studentInfo = append(studentInfo, temp)
+	//fmt.Println(studentInfo)
+	return nil
+}
+func del(args []string) error {
+	fmt.Println("call del")
+	fmt.Println("arg", args)
+	if len(args) == 1 {
+		for i, line := range studentInfo {
+			studentId := strings.Fields(line)
+			if len(studentId) > 0 && studentId[0] == args[0] {
+				//studentInfo[i]=""
+				fmt.Printf("del %s\n", studentInfo[i])
+				studentInfo[i] = ""
+			}
+		}
+	}
 	return nil
 }
 
 func list(args []string) error {
-	return errors.New("unimplemention")
+	//return errors.New("unimplemention")
+	for i, line := range studentInfo {
+		fmt.Println(i, line)
+	}
+	return nil
 }
 
 func load(args []string) error {
 	if len(args) == 1 {
-		input, err := ioutil.ReadFile(args[0])
-		if err != nil {
-			log.Fatal(err)
-		}
-		lines := strings.Split(string(input), "\n")
-
-		for _, line := range lines {
-			fmt.Println(line)
-		}
-		return nil
-	} else {
-		fmt.Println("I need a file")
-		return nil
+		DBfile = args[0]
 	}
+	fmt.Printf("it will open %s\n", DBfile)
+	input, err := ioutil.ReadFile(DBfile)
+	if err != nil {
+		log.Fatal(err)
+
+	}
+	lines := strings.Split(string(input), "\n")
+	studentInfo = lines
+	return nil
+}
+
+func help(args []string) error {
+	if len(args) == 0 {
+		fmt.Println("add students id , it only add new students ")
+		fmt.Println("del students ,it will del student which you choose ")
+		fmt.Println("list , it will show all the students")
+		fmt.Println("update student id, it only change id of student ")
+		fmt.Println("save file, if the file is null,it will save to which it open")
+		fmt.Println("load file, if the file is null,it will open info ")
+	}
+	return nil
+}
+func save(args []string) error {
+	if len(args) == 1 {
+		DBfile = args[0]
+	}
+	var outfile string
+	for _, line := range studentInfo {
+		if len(line) > 0 {
+			outfile = outfile + line + "\n"
+		}
+	}
+	//fmt.Println(outfile)
+
+	err := ioutil.WriteFile(DBfile, []byte(outfile), 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+
 }
 
 func main() {
@@ -54,6 +110,9 @@ func main() {
 		"add":  add,
 		"list": list,
 		"load": load,
+		"help": help,
+		"del":  del,
+		"save": save,
 	}
 
 	f := bufio.NewReader(os.Stdin)
