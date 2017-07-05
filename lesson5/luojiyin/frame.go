@@ -51,6 +51,24 @@ func del(args []string) error {
 	return nil
 }
 
+func update(args []string) error {
+	fmt.Println("call update")
+	fmt.Println("arg", args)
+
+	if len(args) == 2 {
+		for i, line := range studentInfo {
+			studentId := strings.Fields(line)
+			if len(studentId) > 0 && studentId[0] == args[0] {
+				//fmt.Printf("update %s\n", studentInfo[i])
+				temp := strings.Join(args, " ")
+				studentInfo[i] = temp
+				//fmt.Printf("new  %s\n", studentInfo[i])
+			}
+		}
+	}
+	return nil
+}
+
 func list(args []string) error {
 	//return errors.New("unimplemention")
 	for i, line := range studentInfo {
@@ -107,12 +125,13 @@ func save(args []string) error {
 
 func main() {
 	actionmap := map[string]func([]string) error{
-		"add":  add,
-		"list": list,
-		"load": load,
-		"help": help,
-		"del":  del,
-		"save": save,
+		"add":    add,
+		"list":   list,
+		"load":   load,
+		"help":   help,
+		"del":    del,
+		"save":   save,
+		"update": update,
 	}
 
 	f := bufio.NewReader(os.Stdin)
