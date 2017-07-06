@@ -29,17 +29,14 @@ func add(args []string) error {
 
 	name := args[0]
 	id, err := strconv.Atoi(args[1])
-
 	if err != nil {
 		return errors.New("Id should be number")
 	}
 
 	_, ok := students[name]
-
 	if ok {
 		fmt.Printf("%v is in the list \n", name)
 	}
-
 	students[name] = Student{Id: id, Name: name}
 	return nil
 }
@@ -53,7 +50,6 @@ func del(args []string) error {
 	name := args[0]
 
 	_, ok := students[name]
-
 	if ok {
 		delete(students, args[0])
 		fmt.Printf("%v is deleted \n", name)
@@ -78,7 +74,6 @@ func update(args []string) error {
 	}
 
 	_, ok := students[name]
-
 	if ok {
 		students[name] = Student{Id: id, Name: name}
 	} else {
