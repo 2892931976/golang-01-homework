@@ -163,23 +163,23 @@ func main() {
 	}
 
 	for {
-		f := bufio.NewReader(os.Stdin)
+		r := bufio.NewReader(os.Stdin)
 		fmt.Print("> ")
-		line, _ := f.ReadString('\n')
+		line, _ := r.ReadString('\n')
 		cmdline := strings.Fields(line)
 
 		if len(cmdline) == 0 {
 			continue
 		}
 
-		if f, ok := funcMap[cmdline[0]]; !ok {
+		f := funcMap[cmdline[0]]
+		if f == nil {
 			funcMap["help"](cmdline...)
 			continue
-		} else {
-			err := f(cmdline...)
-			if err != nil {
-				fmt.Println(err)
-			}
+		}
+
+		if err := f(cmdline...); err != nil {
+			fmt.Println(err)
 		}
 	}
 }
