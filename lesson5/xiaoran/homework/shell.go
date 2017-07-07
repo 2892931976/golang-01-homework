@@ -26,6 +26,17 @@ func main() {
 
 		//对输入的命令切割
 		cmds := strings.Split(line, "|")
+		if len(cmds) == 1 {
+			args := strings.Fields(line)
+			cmd := exec.Command(args[0], args[1:]...)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			cmd.Start()
+			cmd.Wait()
+			continue
+		}
+
 		s1 := strings.Fields(cmds[0])
 		s2 := strings.Fields(cmds[1])
 
