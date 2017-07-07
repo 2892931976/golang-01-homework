@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -26,45 +25,36 @@ func argsFunc(s string) []*exec.Cmd {
 }
 
 func execFunc(cmdSlice []*exec.Cmd) error {
-	pipeSlice := make([]*io.PipeWriter, len(cmdSlice)-1)
-	i := 0
-	for ; i < len(cmdSlice)-1; i++ {
-		r, w := io.Pipe()
-		cmdSlice[i].Stdout = w
-		cmdSlice[i+1].Stdin = r
-		pipeSlice[i] = w
-	}
-	cmdSlice[i].Stdout = os.Stdout
-	cmdSlice[i].Stderr = os.Stderr
+	var err error
+	max := len(cmdSlice) - 1
+	cmdSlice[max].Stdout = os.Stdout
+	cmdSlice[max].Stderr = os.Stderr
 
-	err := callFunc(cmdSlice, pipeSlice)
-	if err != nil {
-		return err
+	for i, cmd := range cmdSlice[:max] {
+		if i == max {
+			break
+		}
+		cmdSlice[i+1].Stdin, err = cmd.StdoutPipe()
+		if err != nil {
+			return err
+		}
 	}
+
+	for _, cmd := range cmdSlice {
+		err := cmd.Start()
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, cmd := range cmdSlice {
+		err := cmd.Wait()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
-}
-
-func callFunc(cmdSlice []*exec.Cmd, pipeSlice []*io.PipeWriter) error {
-	if cmdSlice[0].Process == nil {
-		err := cmdSlice[0].Start()
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(cmdSlice) > 1 {
-		err := cmdSlice[1].Start()
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if err == nil {
-				pipeSlice[0].Close()
-				err = callFunc(cmdSlice[1:], pipeSlice[1:])
-			}
-		}()
-	}
-	return cmdSlice[0].Wait()
 }
 
 func main() {
