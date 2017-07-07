@@ -10,14 +10,17 @@ import (
 
 func main() {
 	host, _ := os.Hostname()
-	prompt := fmt.Sprintf("[wujianjian@%s]$ ", host)
+	prompt := fmt.Sprintf("[icexin@%s]$ ", host)
 	r := bufio.NewScanner(os.Stdin)
+	//r := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print(prompt)
 		if !r.Scan() {
 			break
 		}
 		line := r.Text()
+		// line, _ := r.ReadString('\n')
+		// line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue
 		}
@@ -30,6 +33,5 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
 	}
 }
