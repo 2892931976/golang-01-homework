@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"encoding/json"
+	"io/ioutil"
 )
 type Student struct{
 	Id int
@@ -42,10 +44,43 @@ func list(args []string)error{
 }
 
 
+func save(args []string) error{
+		file := args[0]
+		f,err := json.Marshal(infos)
+		if err != nil{
+			err := fmt.Errorf("%s,%s","load file",err)
+			return err
+		}
+		ioutil.WriteFile(file, f, 0400)
+		fmt.Println("save ok")
+		return nil
+}
+
+
+
+
+
+func load(args []string) error{
+	file := args[0]
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		err := fmt.Errorf("%s ,%s", "load faile", err)
+		return err
+	}
+	json.Unmarshal(f, &infos)
+	fmt.Println("load ok")
+	return nil
+
+
+}
+
+
 func main(){
 	actionmap := map[string]func([]string)error{
 		"add":add,
 		"list":list,
+		"save":save,
+		"load":load,
 	}
 
 	f := bufio.NewReader(os.Stdin)
