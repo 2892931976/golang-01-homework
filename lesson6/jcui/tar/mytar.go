@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -45,8 +46,33 @@ func tarDir(src, srcs string, tw *tar.Writer, fi os.FileInfo) error {
 	fmt.Println(full_sfile)
 	/*
 		得遍历目录得到所有信息,如果是目录继续遍历,如果是文件则执行tarFile
-		不会写这个了
+		下面写的貌似不对的了,有错误的逻辑,不知道咋写了
 	*/
+	fis, er := ioutil.ReadDir(full_sfile)
+	if er != nil {
+		return er
+	}
+	for _, fi := range fis {
+		if fi.IsDir() {
+			err := tarDir(src, fi.Name(), tw, fi)
+			if err != nil {
+				err := fmt.Errorf("%s, %s", "tar file faild end")
+				return err
+			}
+		} else {
+			err := tarFile(src, fi.Name(), tw, fi)
+			if err != nil {
+				err := fmt.Errorf("%s, %s", "tar file faild end")
+				return err
+			}
+		}
+	}
+	hdr, err := tar.FileInfoHeader(fi, "")
+	if err != nil {
+		return err
+	}
+	hdr.Name = srcs
+
 	return nil
 }
 
@@ -148,18 +174,18 @@ func main() {
 		return
 	}
 	switch os.Args[1] {
-	case "-c":
+	case "-cz":
 		if len(os.Args) != 4 {
-			fmt.Println("args is error. Example : ./mytar -c aa.tar.gz aa")
+			fmt.Println("args is error. Example : ./mytar -cz aa.tar.gz aa")
 			return
 		}
 		err := tarfile(os.Args)
 		if err != nil {
 			log.Fatal(err)
 		}
-	case "-x":
+	case "-xz":
 		if len(os.Args) != 3 {
-			fmt.Println("args is error. Example : ./mytar -x aa.tar.gz")
+			fmt.Println("args is error. Example : ./mytar -xz aa.tar.gz")
 			return
 		}
 		err := untarfile(os.Args[2])
@@ -169,8 +195,8 @@ func main() {
 	default:
 		fmt.Println(`Args is Error.
 For Example :
-	tar   --  ./mytar -c aa.tar.gz aa
-	untar --  ./mytar -x aa.tar.gz   `)
+	tar   --  ./mytar -cz aa.tar.gz aa
+	untar --  ./mytar -xz aa.tar.gz   `)
 		return
 	}
 }
