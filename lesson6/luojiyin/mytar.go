@@ -21,6 +21,9 @@ func checkerror(err error) {
 func main() {
 	flag.Parse()
 
+	//temp := strings.Split(flag.Arg(0), "/")
+	//fmt.Println(len(temp))
+	//l := len(temp)
 	destFile := flag.Arg(0)
 
 	if destFile == "" {
@@ -40,7 +43,7 @@ func main() {
 
 	defer dir.Close()
 
-	files, err := dir.Readdir(0)
+	//files, err := dir.Readdir(0)
 	checkerror(err)
 	tarfile, err := os.Create(destFile)
 
@@ -57,21 +60,20 @@ func main() {
 	tarfileWriter := tar.NewWriter(fileWriter)
 	defer tarfileWriter.Close()
 
-	for _, fileInfo := range files {
-		if fileInfo.IsDir() {
-			continue
+	filepath.Walk(sourcedir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
 		}
-
-		file, err := os.Open(dir.Name() + string(filepath.Separator) + fileInfo.Name())
+		//fmt.Println(path)
+		file, err := os.Open(path)
 		checkerror(err)
-
 		defer file.Close()
 
 		header := new(tar.Header)
 		header.Name = file.Name()
-		header.Size = fileInfo.Size()
-		header.Mode = int64(fileInfo.Mode())
-		header.ModTime = fileInfo.ModTime()
+		header.Size = info.Size()
+		header.Mode = int64(info.Mode())
+		header.ModTime = info.ModTime()
 
 		err = tarfileWriter.WriteHeader(header)
 		checkerror(err)
@@ -79,6 +81,7 @@ func main() {
 		_, err = io.Copy(tarfileWriter, file)
 
 		checkerror(err)
+		return nil
+	})
 
-	}
 }
