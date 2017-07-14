@@ -72,12 +72,13 @@ func tarDir(src, srcs string, tw *tar.Writer, fi os.FileInfo) error {
 			}
 		}
 	}
-	hdr, err := tar.FileInfoHeader(fi, "")
-	if err != nil {
-		return err
+	if len(srcs) > 0 {
+		hdr, err := tar.FileInfoHeader(fi, "")
+		if err != nil {
+			return err
+		}
+		hdr.Name = srcs
 	}
-	hdr.Name = srcs
-
 	return nil
 }
 
