@@ -72,6 +72,6 @@ func main(){
 		return
 	}
 
-	filepath.Walk(os.Args[2], walkFunc)
+	filepath.Walk(os.Args[2:], walkFunc)
 	CreateTar(os.Args[1], file_list)
 }
