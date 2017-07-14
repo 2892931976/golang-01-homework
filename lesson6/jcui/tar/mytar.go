@@ -48,19 +48,24 @@ func tarDir(src, srcs string, tw *tar.Writer, fi os.FileInfo) error {
 		得遍历目录得到所有信息,如果是目录继续遍历,如果是文件则执行tarFile
 		下面写的貌似不对的了,有错误的逻辑,不知道咋写了
 	*/
+	last := len(srcs) - 1
+	if srcs[last] != os.PathSeparator {
+		srcs += string(os.PathSeparator)
+	}
+
 	fis, er := ioutil.ReadDir(full_sfile)
 	if er != nil {
 		return er
 	}
 	for _, fi := range fis {
 		if fi.IsDir() {
-			err := tarDir(src, fi.Name(), tw, fi)
+			err := tarDir(src, srcs+fi.Name(), tw, fi)
 			if err != nil {
 				err := fmt.Errorf("%s, %s", "tar file faild end")
 				return err
 			}
 		} else {
-			err := tarFile(src, fi.Name(), tw, fi)
+			err := tarFile(src, srcs+fi.Name(), tw, fi)
 			if err != nil {
 				err := fmt.Errorf("%s, %s", "tar file faild end")
 				return err
@@ -100,6 +105,8 @@ func tarfile(s []string) error {
 	gf := gzip.NewWriter(df)
 	tw := tar.NewWriter(gf)
 
+	defer gf.Close()
+	defer tw.Close()
 	src, srcs := path.Split(path.Clean(sfile))
 	if fi.IsDir() {
 		tarDir(src, srcs, tw, fi)
