@@ -5,7 +5,7 @@ import "fmt"
 func join_str(s []string, ch chan string) {
 	var temp string
 	for _, v := range s {
-		temp = fmt.Sprintf("%s %s", temp, v)
+		temp = fmt.Sprintf("%s%s", temp, v)
 	}
 	ch <- temp
 }
@@ -18,5 +18,5 @@ func main() {
 	go join_str(s[len(s)/2:], c)
 	x, y := <-c, <-c
 
-	fmt.Printf("%s %s", x, y)
+	fmt.Printf("%s%s\n", x, y)
 }
