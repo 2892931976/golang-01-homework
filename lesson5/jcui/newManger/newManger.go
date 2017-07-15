@@ -46,6 +46,10 @@ func list(args []string) error {
 }
 
 func save(args []string) error {
+	if len(args) == 0 {
+		err := fmt.Errorf("%s", "No file specified")
+		return err
+	}
 	file := args[0]
 	w, err := json.Marshal(stuinfo)
 	if err != nil {
@@ -59,6 +63,10 @@ func save(args []string) error {
 }
 
 func load(args []string) error {
+	if len(args) == 0 {
+		err := fmt.Errorf("%s", "No file specified")
+		return err
+	}
 	file := args[0]
 	//if len(stuinfo) != 0 {
 	//	err := fmt.Errorf("%s", "memory has data ,Please save the data first !")
@@ -119,7 +127,7 @@ func main() {
 		"load":   load,
 		"exit":   exit,
 		"update": update,
-		"del":    del,
+		"delete": del,
 	}
 	f := bufio.NewReader(os.Stdin)
 
@@ -127,6 +135,9 @@ func main() {
 		fmt.Print("> ")
 		line, _ := f.ReadString('\n')
 		args := strings.Fields(line)
+		if len(args) == 0 {
+			continue
+		}
 		cmd := args[0]
 		args = args[1:]
 		action := actionmap[cmd]
