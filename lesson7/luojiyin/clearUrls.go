@@ -84,6 +84,10 @@ func cleanUrls(url string, urls []string) []string {
 
 func main() {
 	url := "http://59.110.12.72:7070/golang-spider/img.html"
+	if strings.Index(url, "http") == -1 {
+		fmt.Println("Please make sure   http or https")
+		return
+	}
 	urls, err := fetch(url)
 	if err != nil {
 		fmt.Println(err)
