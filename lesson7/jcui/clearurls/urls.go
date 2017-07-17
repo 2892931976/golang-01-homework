@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	//"strings"
 	"strings"
 )
 
@@ -23,6 +24,7 @@ func cleanUrls(l string, urls []string) []string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	//return urls
 	for _, v := range urls {
 		u, err := url.Parse(v)
 		if err != nil {
@@ -30,36 +32,26 @@ func cleanUrls(l string, urls []string) []string {
 		}
 		if u.Scheme == "" {
 			if u.Host == "" {
-				if u.Path != "" {
+				if u.Path == "" {
 					tmpsurl := strings.SplitAfter(s_u.Path, "/")
 					tmpul := strings.SplitAfter(u.Path, "/")
-					fmt.Println("sssssss", tmpsurl)
-					fmt.Println("ddddddd", tmpul)
-
-					for i := 0; i < len(tmpsurl); i++ {
-						fmt.Println("fffffff", tmpsurl[:2])
-						fmt.Println("eeeeeee", strings.Join(tmpsurl[:i], "+"))
-
-						if tmpsurl[i] == tmpul[i] {
-							resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+u.Path)
-							break
+					for i := 0; i < len(tmpul)-1; i++ {
+						if tmpul[0] != "/" {
+							if tmpsurl[i+1] != tmpul[i] {
+								resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i+1+1], "")+strings.Join(tmpul[i:], ""))
+							}
 						} else {
-							resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i], "")+u.Path)
-							//if tmpul[0] != "/" {
-							//	resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+"/"+v)
-							//} else {
-							//	resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+v)
-							//}
-							break
+							if tmpsurl[i] != tmpul[i] {
+								resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i], "")+strings.Join(tmpul[i:], ""))
+							}
 						}
 					}
-
 				}
 			} else {
 				resurls = append(resurls, s_u.Scheme+":"+v)
 			}
 		} else {
-			resurls = append(resurls, l)
+			resurls = append(resurls, v)
 		}
 
 	}
@@ -96,7 +88,8 @@ func fetch(l string) ([]string, error) {
 }
 
 func main() {
-	l := "http://59.110.12.72:7070/golang-spider/img.html"
+	//l := "http://59.110.12.72:7070/golang-spider/img.html"
+	l := "http://daily.zhihu.com/"
 	/*
 		http://59.110.12.72:7070/golang-spider/img.html
 	*/
