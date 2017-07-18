@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func tarFun(desc, src string) error {
@@ -21,28 +22,39 @@ func tarFun(desc, src string) error {
 	tr := tar.NewWriter(gw)
 	defer tr.Close()
 
-	fi, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
+	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 
-	hdr, err := tar.FileInfoHeader(fi, "")
-	if err != nil {
-		return err
-	}
+		fi, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
 
-	err = tr.WriteHeader(hdr)
-	if err != nil {
-		return err
-	}
+		hdr, err := tar.FileInfoHeader(fi, "")
+		if err != nil {
+			return err
+		}
+		hdr.Name = filepath.Join(src, path)
 
-	fs, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer fs.Close()
+		err = tr.WriteHeader(hdr)
+		if err != nil {
+			return err
+		}
 
-	_, err = io.Copy(tr, fs)
+		fs, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer fs.Close()
+
+		if fi.Mode().IsRegular() {
+			io.Copy(tr, fs)
+		}
+
+		return nil
+	})
 	if err != nil {
 		return err
 	}
