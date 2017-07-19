@@ -113,8 +113,8 @@ func fetch(l string) ([]string, error) {
 }
 
 func main() {
-	//l := "http://59.110.12.72:7070/golang-spider/img.html"
-	l := "http://daily.zhihu.com/"
+	l := "http://59.110.12.72:7070/golang-spider/img.html"
+	//l := "http://daily.zhihu.com/"
 	/*
 		http://59.110.12.72:7070/golang-spider/img.html
 	*/
