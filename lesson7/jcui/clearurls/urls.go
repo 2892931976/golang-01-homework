@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	//"strings"
 	"strings"
 )
 
@@ -24,35 +23,61 @@ func cleanUrls(l string, urls []string) []string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//return urls
 	for _, v := range urls {
 		u, err := url.Parse(v)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if u.Scheme == "" {
-			if u.Host == "" {
-				if u.Path == "" {
-					tmpsurl := strings.SplitAfter(s_u.Path, "/")
-					tmpul := strings.SplitAfter(u.Path, "/")
-					for i := 0; i < len(tmpul)-1; i++ {
-						if tmpul[0] != "/" {
-							if tmpsurl[i+1] != tmpul[i] {
-								resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i+1+1], "")+strings.Join(tmpul[i:], ""))
-							}
-						} else {
-							if tmpsurl[i] != tmpul[i] {
-								resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i], "")+strings.Join(tmpul[i:], ""))
-							}
-						}
-					}
-				}
-			} else {
-				resurls = append(resurls, s_u.Scheme+":"+v)
-			}
-		} else {
+		//判断是否有http
+		if u.Scheme != "" {
 			resurls = append(resurls, v)
+			continue
 		}
+		//判读是否有host
+		if u.Host != "" {
+			resurls = append(resurls, s_u.Scheme+":"+v)
+			continue
+		}
+		//判断path
+		if u.Path != "" {
+			tmp_s_url := strings.SplitAfter(s_u.Path, "/")
+			tmp_d_url := strings.SplitAfter(u.Path, "/")
+			for i := 0; i < len(tmp_d_url)-1; i++ {
+				if tmp_s_url[i] != tmp_d_url[i] && tmp_d_url[0] == "/" {
+					resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmp_s_url[:i], "")+strings.Join(tmp_d_url[i:], ""))
+					break
+				}
+				if tmp_d_url[0] != "/" && tmp_s_url[i+1] != tmp_d_url[i] {
+					resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmp_s_url[:i+1+1], "")+strings.Join(tmp_d_url[i:], ""))
+					break
+				}
+			}
+			continue
+		}
+
+		//if u.Scheme == "" {
+		//	if u.Host == "" {
+		//		if u.Path == "" {
+		//			tmpsurl := strings.SplitAfter(s_u.Path, "/")
+		//			tmpul := strings.SplitAfter(u.Path, "/")
+		//			for i := 0; i < len(tmpul)-1; i++ {
+		//				if tmpul[0] != "/" {
+		//					if tmpsurl[i+1] != tmpul[i] {
+		//						resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i+1+1], "")+strings.Join(tmpul[i:], ""))
+		//					}
+		//				} else {
+		//					if tmpsurl[i] != tmpul[i] {
+		//						resurls = append(resurls, s_u.Scheme+"://"+s_u.Host+strings.Join(tmpsurl[:i], "")+strings.Join(tmpul[i:], ""))
+		//					}
+		//				}
+		//			}
+		//		}
+		//	} else {
+		//		resurls = append(resurls, s_u.Scheme+":"+v)
+		//	}
+		//} else {
+		//	resurls = append(resurls, v)
+		//}
 
 	}
 
