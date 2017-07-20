@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -36,6 +37,10 @@ type ClassRoom struct {
 }
 
 func (c *ClassRoom) List() {
+	if c == nil {
+		fmt.Println("Please choose the classroom first")
+		return
+	}
 	for _, stu := range c.students {
 		fmt.Println(stu.Name, stu.Id)
 	}
@@ -69,31 +74,63 @@ func (c *ClassRoom) Update(name string, id int) error {
 	return nil
 }
 
+func (c *ClassRoom) Del(name string) error {
+	if _, ok := c.students[name]; ok {
+		delete(c.students, name)
+		fmt.Printf("del %s is ok \n", name)
+	} else {
+		err := fmt.Errorf("学生%s不存在,请检查", name)
+		return err
+	}
+	return nil
+
+}
+
+// 具体调用的函数
+
 func choose(args []string) error {
+	if len(args) != 1 {
+		err := fmt.Errorf("%s", "Example : choose reboot")
+		return err
+	}
 	name := args[0]
 	if classrooms, ok := classrooms[name]; ok {
 		currentClassRoom = classrooms
 	} else {
-		err := fmt.Errorf("%s ,%s", classrooms, "不存在")
-		return err
+		currentClassRoom = &ClassRoom{
+			students: make(map[string]*Student),
+		}
 	}
+	fmt.Printf("ClassRoom: %v\n", name)
 	return nil
 }
 
 func add(args []string) error {
-	name := ""
-	id := 0
-	currentClassRoom.Add(name, id)
+	if len(args) != 2 {
+		err := fmt.Errorf("%s", "add number of args is error")
+		return err
+	}
+	name := args[0]
+	id, err := strconv.Atoi(args[1])
+	if err != nil {
+		err := fmt.Errorf("%s ,%s", "id type is not int", err)
+		return err
+	}
+	err = currentClassRoom.Add(name, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func save(args []string) error {
-	if len(args) == 0 {
+	if len(args) != 1 {
 		err := fmt.Errorf("%s", "No file specified")
 		return err
 	}
 	file := args[0]
-	buf, err := json.Marshal(classrooms)
+	buf, err := currentClassRoom.MarshalJSON() //这里有个问题,保存数据的时候没存入classroom的信息
+	//buf, err := json.Marshal(currentClassRoom)
 	if err != nil {
 		return err
 	}
@@ -118,17 +155,32 @@ func load(args []string) error {
 }
 
 func update(args []string) error {
-
+	if len(args) != 2 {
+		err := fmt.Errorf("%s", "Example : update jcui 1")
+		return err
+	}
+	name := args[0]
+	id, err := strconv.Atoi(args[1])
+	if err != nil {
+		err := fmt.Errorf("%s ,%s", "id type is not int", err)
+		return err
+	}
+	currentClassRoom.Update(name, id)
 	return nil
 }
 
 func del(args []string) error {
-
+	if len(args) != 1 {
+		err := fmt.Errorf("%s", "Example : delete jcui")
+		return err
+	}
+	name := args[0]
+	currentClassRoom.Del(name)
 	return nil
 }
 
 func list(args []string) error {
-
+	currentClassRoom.List()
 	return nil
 }
 
