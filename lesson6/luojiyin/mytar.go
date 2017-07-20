@@ -21,9 +21,11 @@ func checkerror(err error) {
 func main() {
 	flag.Parse()
 
-	//temp := strings.Split(flag.Arg(0), "/")
-	//fmt.Println(len(temp))
-	//l := len(temp)
+	Dir := strings.Split(flag.Arg(1), "/")
+	//fmt.Println(Dir)
+	l := len(Dir)
+	baseDir := strings.Join(Dir[l-1:], "")
+	//fmt.Println(baseDir)
 	destFile := flag.Arg(0)
 
 	if destFile == "" {
@@ -70,7 +72,24 @@ func main() {
 		defer file.Close()
 
 		header := new(tar.Header)
-		header.Name = file.Name()
+		Name := file.Name()
+		temp := strings.Split(Name, "/")
+		var temp1 string
+		//l := len(temp)
+		for k, _ := range temp {
+			if temp[k] == baseDir {
+				//fmt.Println("----------------------------------")
+				//fmt.Println(k, v)
+				temp1 = strings.Join(temp[k:], "/")
+				break
+			}
+
+		}
+		//temp1 := strings.Join(temp[l-2:], "")
+		//fmt.Println(temp1)
+		//fmt.Println(temp)
+		//fmt.Println(header.Name)
+		header.Name = temp1
 		header.Size = info.Size()
 		header.Mode = int64(info.Mode())
 		header.ModTime = info.ModTime()
