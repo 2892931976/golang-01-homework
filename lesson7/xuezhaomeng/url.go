@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"io/ioutil"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -43,8 +47,10 @@ func GetImgUrl(u string) ([]string, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//				标签<img>
 	doc.Find("img").Each(func(i int, s *goquery.Selection) {
-		link, ok := s.Attr("src")
+		link, ok := s.Attr("src") //attr() 选择的元素
 		if ok {
 			urls = append(urls, link)
 		} else {
@@ -52,6 +58,33 @@ func GetImgUrl(u string) ([]string, error) {
 		}
 	})
 	return urls, nil
+}
+
+func Wget_Img(link, desc string) error {
+	u, err := url.Parse(link)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	img_resp, err := http.Get(link)
+	if err != nil {
+		fmt.Println("图片下载失败")
+		return err
+	}
+
+	imgname := filepath.Join(desc, u.Path)
+	dir := filepath.Dir(imgname) //获取父目录
+	os.MkdirAll(dir, 0755)
+	f, err := os.Create(imgname)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	body, _ := ioutil.ReadAll(img_resp.Body)
+	f.Write(body)
+	return nil
+
 }
 
 func main() {
@@ -64,9 +97,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	desc := "./img/"
 	for _, link := range urls {
-		fmt.Println(CleanUrl(access_url_info, link))
+		img_link := CleanUrl(access_url_info, link)
+		Wget_Img(img_link, desc)
 	}
 
 }
