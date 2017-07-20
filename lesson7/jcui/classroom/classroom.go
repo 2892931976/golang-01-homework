@@ -25,7 +25,9 @@ func (s *ClassRoom) MarshalJSON() ([]byte, error) {
 	//		m["students"] = s.students
 	//		return json.Marshal(m)
 	//
-	return json.Marshal(s.students)
+	m := make(map[string]interface{})
+	m[s.name] = s.students
+	return json.Marshal(m)
 }
 
 func (s *ClassRoom) UnmarshalJSON(buf []byte) error {
@@ -33,6 +35,7 @@ func (s *ClassRoom) UnmarshalJSON(buf []byte) error {
 }
 
 type ClassRoom struct {
+	name     string
 	students map[string]*Student
 }
 
@@ -98,9 +101,11 @@ func choose(args []string) error {
 		currentClassRoom = classrooms
 	} else {
 		currentClassRoom = &ClassRoom{
+			name:     name,
 			students: make(map[string]*Student),
 		}
 	}
+	fmt.Println(currentClassRoom.name)
 	fmt.Printf("ClassRoom: %v\n", name)
 	return nil
 }
@@ -150,7 +155,8 @@ func load(args []string) error {
 		err := fmt.Errorf("%s ,%s", "load faile", err)
 		return err
 	}
-	json.Unmarshal(f, &classrooms)
+	currentClassRoom.UnmarshalJSON(f) //这里同样的问题,load的时候必须先choose classroom
+	//json.Unmarshal(f, &classrooms)
 	return nil
 }
 
