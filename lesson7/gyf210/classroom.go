@@ -116,6 +116,9 @@ func list(args ...string) error {
 	if len(args) != 1 {
 		return errors.New("请按如下格式输入：list")
 	}
+	if croom.Name == "" {
+		return errors.New("请选择ClassRoom")
+	}
 	croom.list()
 	return nil
 }
@@ -132,6 +135,9 @@ func add(args ...string) error {
 		return errors.New("[Id]: 请输入整数类型")
 	}
 
+	if croom.Name == "" {
+		return errors.New("请选择ClassRoom")
+	}
 	if err := croom.add(n, name); err != nil {
 		return err
 	}
@@ -143,6 +149,9 @@ func del(args ...string) error {
 		return errors.New("请按如下格式输入：del [Name]")
 	}
 	name := args[1]
+	if croom.Name == "" {
+		return errors.New("请选择ClassRoom")
+	}
 	if err := croom.del(name); err != nil {
 		return err
 	}
@@ -162,6 +171,9 @@ func update(args ...string) error {
 		return errors.New("[Id]: 请输入整数类型")
 	}
 
+	if croom.Name == "" {
+		return errors.New("请选择ClassRoom")
+	}
 	if err := croom.update(n, name); err != nil {
 		return err
 	}
