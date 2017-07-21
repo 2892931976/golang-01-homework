@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	//"io/ioutil"
+	//"log"
 	"os"
 	"strconv"
 	"strings"
+	"bufio"
 )
 
 type Student struct {
@@ -18,6 +19,7 @@ type Student struct {
 var classrooms map[string]*ClassRoom
 
 type ClassRoom struct {
+	Name string
 	students map[string]*Student
 }
 
@@ -33,33 +35,35 @@ func (c *ClassRoom) UnMarshalJSON(buf []byte) error {
 	return json.Unmarshal(buf, &c.students)
 }
 
-func choose(args ...[]string) error {
+func choose(args []string) error {
 	name := args[0]
-	if classroom, ok := classrooms[Name]; ok {
+	if classroom, ok := classrooms[name]; ok {
 
 		currentClassRoom = classroom
 	} else {
 
 		currentClassRoom = &ClassRoom{
 
-			Name:     Name,
+			Name:     name,
 			students: make(map[string]*Student),
 		}
-		classrooms[Name] = currentClassRoom
+		classrooms[name] = currentClassRoom
 
 	}
-	fmt.Printf("choice classroom: %v", Name)
+	fmt.Printf("choice classroom: %v", name)
+	return nil
 
 }
 
 func (c *ClassRoom) List() error {
 
-	for k, v := range c.students {
+	for _, v := range c.students {
 		fmt.Println(v.Name, v.Id)
 
 	}
+	return nil
 }
-func list(args ...[]string) error {
+func list(args []string) error {
 	currentClassRoom.List()
 	return nil
 }
@@ -80,11 +84,11 @@ func (c *ClassRoom) Add(Name string, id int) error {
 
 }
 
-func add(args, ...[]string) error {
+func add(args []string) error {
 
-	Name := args[0]
+	name := args[0]
 	id, _ := strconv.Atoi(args[1])
-	currentClassRoom.Add(Name, id)
+	currentClassRoom.Add(name, id)
 	return nil
 }
 
@@ -102,7 +106,7 @@ func (c *ClassRoom) Update(Name string, id int) error {
 	}
 	return nil
 }
-func update(args ...[]string) error {
+func update(args []string) error {
 
 	Name := args[0]
 	id, _ := strconv.Atoi(args[1])
@@ -123,13 +127,13 @@ func (c *ClassRoom) Delete(Name string) error {
 
 }
 
-func del(args ...[]string) error {
+func del(args []string) error {
 
 	Name := args[0]
 	currentClassRoom.Delete(Name)
 	return nil
 }
-func save(args ...[]string) error {
+func save(args []string) error {
 
 	buf, err := json.Marshal(classrooms)
 	filename, err := os.Create(os.Args[1])
@@ -166,8 +170,8 @@ func save(args ...[]string) error {
 // }
 
 func main() {
-	classrooms := make(map[string]*ClassRoom)
-	operationMap := map[string]func(...string) error{
+	classrooms = make(map[string]*ClassRoom)
+	operationMap := map[string]func([]string) error{
 		"list":   list,
 		"add":    add,
 		"del":    del,
@@ -188,13 +192,16 @@ func main() {
 		cmdline = cmdline[1:]
 		ff := operationMap[cmd]
 
-		if f == nil {
+		if ff == nil {
 			fmt.Println("input error")
 			continue
 		}
 
-		if err := ff(cmdline...); err != nil {
-			fmt.Println(err)
+		err := ff(cmdline)
+
+		if err != nil {
+			fmt.Printf( "caouo %v fasheng %v",cmd, err)
+			continue
 		}
 
 	}
