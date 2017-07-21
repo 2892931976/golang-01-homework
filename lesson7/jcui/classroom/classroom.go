@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+//这个版本有问题,可以忽略,直接看class2.go即可!!!
 var classrooms map[string]*ClassRoom
 var currentClassRoom *ClassRoom
 
