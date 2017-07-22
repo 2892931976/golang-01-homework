@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -51,18 +52,11 @@ func downloadImgs(urls []string, dir string) error {
 				return
 			}
 			defer resp.Body.Close()
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
 			_, file := filepath.Split(url)
 			fname := filepath.Join(dir, file)
 			f, err := os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0644)
 			defer f.Close()
-			if err == nil {
-				f.Write(body)
-			}
+      io.Copy(f, resp.Body)
 		}(url, dir)
 		wg.Add(1)
 	}
@@ -95,15 +89,20 @@ func CleanUrls(u string, urls []string) []string {
 }
 
 func maketar(dir string, w io.Writer) error {
-	tr := tar.NewWriter(w)
+  basedir := filepath.Base(dir)
+  compress := gzip.NewWriter(w)
+  defer compress.Close()
+	tr := tar.NewWriter(compress)
 	defer tr.Close()
 	filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
 		header, err := tar.FileInfoHeader(info, "")
 		if err != nil {
 			return err
 		}
-		header.Name = name
-		fmt.Printf("name=%s, header.name=%s, info.name=%s\n", name, header.Name, info.Name())
+		//header.Name = name
+    p, _ := filepath.Rel(dir, name)
+    header.Name = filepath.Join(basedir, p)
+		//fmt.Printf("name=%s, header.name=%s, info.name=%s\n", name, header.Name, info.Name())
 		err = tr.WriteHeader(header)
 		if err != nil {
 			return nil
@@ -147,7 +146,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	f, err := os.OpenFile("sp.tar", os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile("sp.tar.gz", os.O_CREATE|os.O_RDWR, 0644)
 	fmt.Println(tempdir)
 	maketar(tempdir, f)
 	f.Close()
