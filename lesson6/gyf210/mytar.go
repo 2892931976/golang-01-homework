@@ -26,33 +26,23 @@ func tarFun(desc, src string) error {
 		if err != nil {
 			return err
 		}
-
-		fi, err := os.Stat(path)
+		hdr, err := tar.FileInfoHeader(info, "")
 		if err != nil {
 			return err
 		}
-
-		hdr, err := tar.FileInfoHeader(fi, "")
-		if err != nil {
-			return err
-		}
-		hdr.Name = filepath.Join(src, path)
-
+		hdr.Name = path
 		err = tr.WriteHeader(hdr)
 		if err != nil {
 			return err
 		}
-
 		fs, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 		defer fs.Close()
-
-		if fi.Mode().IsRegular() {
+		if info.Mode().IsRegular() {
 			io.Copy(tr, fs)
 		}
-
 		return nil
 	})
 	if err != nil {
