@@ -21,6 +21,11 @@ func checkerror(err error) {
 func main() {
 	flag.Parse()
 
+	Dir := strings.Split(flag.Arg(1), "/")
+	//fmt.Println(Dir)
+	l := len(Dir)
+	baseDir := strings.Join(Dir[l-1:], "")
+	//fmt.Println(baseDir)
 	destFile := flag.Arg(0)
 
 	if destFile == "" {
@@ -40,7 +45,7 @@ func main() {
 
 	defer dir.Close()
 
-	files, err := dir.Readdir(0)
+	//files, err := dir.Readdir(0)
 	checkerror(err)
 	tarfile, err := os.Create(destFile)
 
@@ -57,21 +62,37 @@ func main() {
 	tarfileWriter := tar.NewWriter(fileWriter)
 	defer tarfileWriter.Close()
 
-	for _, fileInfo := range files {
-		if fileInfo.IsDir() {
-			continue
+	filepath.Walk(sourcedir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
 		}
-
-		file, err := os.Open(dir.Name() + string(filepath.Separator) + fileInfo.Name())
+		//fmt.Println(path)
+		file, err := os.Open(path)
 		checkerror(err)
-
 		defer file.Close()
 
 		header := new(tar.Header)
-		header.Name = file.Name()
-		header.Size = fileInfo.Size()
-		header.Mode = int64(fileInfo.Mode())
-		header.ModTime = fileInfo.ModTime()
+		Name := file.Name()
+		temp := strings.Split(Name, "/")
+		var temp1 string
+		//l := len(temp)
+		for k, _ := range temp {
+			if temp[k] == baseDir {
+				//fmt.Println("----------------------------------")
+				//fmt.Println(k, v)
+				temp1 = strings.Join(temp[k:], "/")
+				break
+			}
+
+		}
+		//temp1 := strings.Join(temp[l-2:], "")
+		//fmt.Println(temp1)
+		//fmt.Println(temp)
+		//fmt.Println(header.Name)
+		header.Name = temp1
+		header.Size = info.Size()
+		header.Mode = int64(info.Mode())
+		header.ModTime = info.ModTime()
 
 		err = tarfileWriter.WriteHeader(header)
 		checkerror(err)
@@ -79,6 +100,7 @@ func main() {
 		_, err = io.Copy(tarfileWriter, file)
 
 		checkerror(err)
+		return nil
+	})
 
-	}
 }
