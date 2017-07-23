@@ -133,32 +133,28 @@ func maketar(dir string, w io.Writer) error {
 	return nil
 }
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "argument not enough")
-		os.Exit(1)
-	}
-	url := os.Args[1]
-	urls, err := fetch(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	urls = CleanUrls(url, urls)
-	for _, u := range urls {
-		log.Println(u)
-	}
-
+func fetchImages(w io.Writer, url string) {
+  urls, err := fetch(url)
+  if err != nil {
+    log.Fatal(err) 
+  }
+  urls = CleanUrls(url, urls)
 	tempdir, err := ioutil.TempDir(".", "spider")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(tempdir)
-	err = downloadImgs(urls, tempdir)
 	if err != nil {
 		log.Panic(err)
 	}
-	f, err := os.OpenFile("sp.tar.gz", os.O_CREATE|os.O_RDWR, 0644)
-	fmt.Println(tempdir)
-	maketar(tempdir, f)
-	f.Close()
+  err = downloadImgs(urls, tempdir)
+  if err != nil {
+    log.Panic(err) 
+  }
+  maketar(tempdir, w)
+}
+
+func handleHTTP(w http.ResponseWriter, r *http.Request) {
+  r.ParseForm()
+  fetchImages(w, r.FormValue("u"))
+}
+func main() {
+  http.HandleFunc("/", handleHTTP)
+  http.ListenAndServe(":7071", nil)
 }
