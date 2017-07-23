@@ -56,7 +56,7 @@ func downloadImgs(urls []string, dir string) error {
 			fname := filepath.Join(dir, file)
 			f, err := os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0644)
 			defer f.Close()
-      io.Copy(f, resp.Body)
+			io.Copy(f, resp.Body)
 		}(url, dir)
 		wg.Add(1)
 	}
@@ -89,9 +89,9 @@ func CleanUrls(u string, urls []string) []string {
 }
 
 func maketar(dir string, w io.Writer) error {
-  basedir := filepath.Base(dir)
-  compress := gzip.NewWriter(w)
-  defer compress.Close()
+	basedir := filepath.Base(dir)
+	compress := gzip.NewWriter(w)
+	defer compress.Close()
 	tr := tar.NewWriter(compress)
 	defer tr.Close()
 	filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
@@ -100,8 +100,8 @@ func maketar(dir string, w io.Writer) error {
 			return err
 		}
 		//header.Name = name
-    p, _ := filepath.Rel(dir, name)
-    header.Name = filepath.Join(basedir, p)
+		p, _ := filepath.Rel(dir, name)
+		header.Name = filepath.Join(basedir, p)
 		//fmt.Printf("name=%s, header.name=%s, info.name=%s\n", name, header.Name, info.Name())
 		err = tr.WriteHeader(header)
 		if err != nil {
