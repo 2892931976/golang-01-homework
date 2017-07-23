@@ -43,35 +43,35 @@ func fetch(url string) ([]string, error) {
 }
 func downloadImgs(urls []string, dir string) error {
 	var wg sync.WaitGroup
-  wg.Add(5)
-  taskch := make(chan string)
-  for i := 0; i < 5; i++ {
-    go work(dir, taskch, &wg)
-  }
+	wg.Add(5)
+	taskch := make(chan string)
+	for i := 0; i < 5; i++ {
+		go work(dir, taskch, &wg)
+	}
 	for _, url := range urls {
-    taskch <- url
-  }
-  close(taskch)
+		taskch <- url
+	}
+	close(taskch)
 	wg.Wait()
 	return nil
 }
 
 func work(dir string, ch chan string, wg *sync.WaitGroup) {
 
-  for url := range ch {
-    resp, err := http.Get(url)
-    if err != nil {
-      fmt.Println(err)
-      return
-    }
-    defer resp.Body.Close()
-    _, file := filepath.Split(url)
-    fname := filepath.Join(dir, file)
-    f, err := os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0644)
-    defer f.Close()
-    io.Copy(f, resp.Body)
-  }
-  wg.Done()
+	for url := range ch {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer resp.Body.Close()
+		_, file := filepath.Split(url)
+		fname := filepath.Join(dir, file)
+		f, err := os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0644)
+		defer f.Close()
+		io.Copy(f, resp.Body)
+	}
+	wg.Done()
 }
 
 func CleanUrl(uri *urllib.URL, link string) string {
@@ -100,9 +100,9 @@ func CleanUrls(u string, urls []string) []string {
 }
 
 func maketar(dir string, w io.Writer) error {
-  basedir := filepath.Base(dir)
-  compress := gzip.NewWriter(w)
-  defer compress.Close()
+	basedir := filepath.Base(dir)
+	compress := gzip.NewWriter(w)
+	defer compress.Close()
 	tr := tar.NewWriter(compress)
 	defer tr.Close()
 	filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
@@ -111,8 +111,8 @@ func maketar(dir string, w io.Writer) error {
 			return err
 		}
 		//header.Name = name
-    p, _ := filepath.Rel(dir, name)
-    header.Name = filepath.Join(basedir, p)
+		p, _ := filepath.Rel(dir, name)
+		header.Name = filepath.Join(basedir, p)
 		//fmt.Printf("name=%s, header.name=%s, info.name=%s\n", name, header.Name, info.Name())
 		err = tr.WriteHeader(header)
 		if err != nil {
@@ -134,27 +134,27 @@ func maketar(dir string, w io.Writer) error {
 }
 
 func fetchImages(w io.Writer, url string) {
-  urls, err := fetch(url)
-  if err != nil {
-    log.Fatal(err) 
-  }
-  urls = CleanUrls(url, urls)
+	urls, err := fetch(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	urls = CleanUrls(url, urls)
 	tempdir, err := ioutil.TempDir(".", "spider")
 	if err != nil {
 		log.Panic(err)
 	}
-  err = downloadImgs(urls, tempdir)
-  if err != nil {
-    log.Panic(err) 
-  }
-  maketar(tempdir, w)
+	err = downloadImgs(urls, tempdir)
+	if err != nil {
+		log.Panic(err)
+	}
+	maketar(tempdir, w)
 }
 
 func handleHTTP(w http.ResponseWriter, r *http.Request) {
-  r.ParseForm()
-  fetchImages(w, r.FormValue("u"))
+	r.ParseForm()
+	fetchImages(w, r.FormValue("u"))
 }
 func main() {
-  http.HandleFunc("/", handleHTTP)
-  http.ListenAndServe(":7071", nil)
+	http.HandleFunc("/", handleHTTP)
+	http.ListenAndServe(":7071", nil)
 }
