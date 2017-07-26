@@ -3,8 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -46,7 +51,7 @@ func cleanUrls(u string, urls []string) []string {
 	host := linkState.Host
 	for _, link := range urls {
 		switch {
-		case strings.HasPrefix(link, "https") || strings.HasPrefix(link, "http"):
+		case strings.HasPrefix(link, "http") || strings.HasPrefix(link, "https"):
 			cleanUrls = append(cleanUrls, link)
 		case strings.HasPrefix(link, "//"):
 			link = scheme + ":" + link
@@ -57,6 +62,34 @@ func cleanUrls(u string, urls []string) []string {
 		}
 	}
 	return cleanUrls
+}
+
+func downloadimg(dir, target string) error {
+	log.Print(target)
+	uri, err := url.Parse(target)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Get(target)
+	if err != nil {
+		log.Print(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(resp.Status)
+	}
+	name := path.Base(uri.Path)
+	fullpath := filepath.Join(dir, name)
+	f, err := os.Create(fullpath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	io.Copy(f, resp.Body)
+	return nil
 }
 
 func main() {
