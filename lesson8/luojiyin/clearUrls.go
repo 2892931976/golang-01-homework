@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/tar"
 	"errors"
 	"fmt"
 	"io"
@@ -84,6 +85,7 @@ func downloadimg(dir, target string) error {
 	}
 	name := path.Base(uri.Path)
 	fullpath := filepath.Join(dir, name)
+	log.Print(fullpath)
 	f, err := os.Create(fullpath)
 	if err != nil {
 		return err
@@ -101,6 +103,23 @@ func downloadimgs(dir string, urls []string) error {
 		}
 	}
 	return nil
+}
+
+func maketar(dir string, w io.Writer) error {
+	base := filepath.Base(dir)
+	tw := tar.NewWriter(w)
+	defer tw.Close()
+	return filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		f, err := os.Open(name)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+	})
 }
 
 func main() {
