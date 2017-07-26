@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"io/ioutil"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -92,6 +94,15 @@ func downloadimg(dir, target string) error {
 	return nil
 }
 
+func downloadimgs(dir string, urls []string) error {
+	for _, u := range urls {
+		if err := downloadimg(dir, u); err != nil {
+			log.Print(err)
+		}
+	}
+	return nil
+}
+
 func main() {
 	url := "http://www.cikers.com"
 	if strings.Index(url, "http") == -1 {
@@ -105,5 +116,14 @@ func main() {
 	cUrls := cleanUrls(url, urls)
 	for k, v := range cUrls {
 		fmt.Println(k, v)
+	}
+	dir, err := ioutil.TempDir("", "img")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	err = downloadimgs(dir, cUrls)
+	if err != nil {
+		log.Panic(err)
 	}
 }
