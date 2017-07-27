@@ -106,19 +106,30 @@ func downloadimgs(dir string, urls []string) error {
 }
 
 func maketar(dir string, w io.Writer) error {
-	base := filepath.Base(dir)
+	basedir := filepath.Base(dir)
 	tw := tar.NewWriter(w)
 	defer tw.Close()
-	return filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		f, err := os.Open(name)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
 
+	return filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
+		header, err := tar.FileInfoHeader(info, "")
+		if err != nil {
+			return err
+		}
+
+		p, _ := filepath.Rel(dir, name)
+		header.Name = filepath.Join(basedir, p)
+		err = tw.WriteHeader(header)
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			f, err := os.Open(name)
+			defer f.Close()
+			_, err = io.Copy(tw, f)
+			return err
+		}
+		return nil
 	})
 }
 
@@ -142,6 +153,11 @@ func main() {
 	}
 
 	err = downloadimgs(dir, cUrls)
+	if err != nil {
+		log.Panic(err)
+	}
+	var fi
+	err = maketar(dir, w)
 	if err != nil {
 		log.Panic(err)
 	}
