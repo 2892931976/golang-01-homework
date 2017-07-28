@@ -1,23 +1,22 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"archive/tar"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"net/url"
-	"strings"
+	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
-	"io"
-	"archive/tar"
-	"time"
 	"path/filepath"
+	"strings"
 	"sync"
+	"time"
 	//"compress/gzip"
 )
-
 
 func fetch(url string) ([]string, error) {
 
@@ -47,7 +46,6 @@ func fetch(url string) ([]string, error) {
 	return urls, nil
 }
 
-
 func cleanUrl(taskq chan string, ur string, urls []string) {
 	//var urll []string
 	u, err := url.Parse(ur)
@@ -57,7 +55,6 @@ func cleanUrl(taskq chan string, ur string, urls []string) {
 	base_scheme := u.Scheme
 	base_host := u.Host
 	base_path := strings.Split(u.Path, "/")[1]
-
 
 	for _, i := range urls {
 		switch {
@@ -76,19 +73,19 @@ func cleanUrl(taskq chan string, ur string, urls []string) {
 
 func downimag(urls chan string, wg *sync.WaitGroup, tmpdir string) error {
 
-	for link := range urls{
-		reps, err :=http.Get(link)
+	for link := range urls {
+		reps, err := http.Get(link)
 
-		if err != nil{
+		if err != nil {
 			fmt.Println("create img file err: ", err)
 			continue
 		}
 		defer reps.Body.Close()
-		s :=string(path.Base(link))
+		s := string(path.Base(link))
 		//tmpdir = tmpdir + "\"
-		f, err:= os.Create(tmpdir+"\\"+s)
+		f, err := os.Create(tmpdir + "\\" + s)
 		defer f.Close()
-		if err != nil{
+		if err != nil {
 			fmt.Println("get url error")
 			continue
 		}
@@ -98,10 +95,9 @@ func downimag(urls chan string, wg *sync.WaitGroup, tmpdir string) error {
 	return nil
 }
 
-
 func maketar(dir string, dstTar string) error {
 	// 创建空的目标文件
-	fw, er := os.Create(dstTar+".tar")
+	fw, er := os.Create(dstTar + ".tar")
 	if er != nil {
 		return er
 	}
@@ -110,14 +106,14 @@ func maketar(dir string, dstTar string) error {
 	//uncompress := gzip.NewWriter(fw)		// 压缩
 	//defer uncompress.Close()
 
-	tw := tar.NewWriter(fw)			// 打包
+	tw := tar.NewWriter(fw) // 打包
 	defer tw.Close()
 
 	b_dir := filepath.Base(dir)
 
 	filepath.Walk(dir, func(name string, info os.FileInfo, err error) error {
 		header, err := tar.FileInfoHeader(info, "")
-		if err != nil{
+		if err != nil {
 			fmt.Println("tar FileInfoHeader err")
 			return err
 		}
@@ -125,7 +121,7 @@ func maketar(dir string, dstTar string) error {
 		p, _ := filepath.Rel(dir, name)
 		header.Name = filepath.Join(b_dir, p)
 
-		if err = tw.WriteHeader(header); err != nil{
+		if err = tw.WriteHeader(header); err != nil {
 			fmt.Println("tw WriteHeader err", err)
 			return err
 		}
@@ -142,16 +138,15 @@ func maketar(dir string, dstTar string) error {
 		//	fmt.Println("io copy err", er)
 		//	return er
 		//}
-		io.Copy(tw, fr)			// 这里如果收集报错 将会终止walk 注意！！！！
+		io.Copy(tw, fr) // 这里如果收集报错 将会终止walk 注意！！！！
 
 		return nil
 	})
 	return nil
 }
 
-
 func main() {
-	t1:= time.Now().Unix()
+	t1 := time.Now().Unix()
 
 	//url := "http://59.110.12.72:7070/golang-spider/img.html"
 	url := "http://www.quanjing.com/"
@@ -161,7 +156,7 @@ func main() {
 	}
 
 	tmpdir, err := ioutil.TempDir("E:\\gopro\\TEST\\lesson8", "spider")
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -170,7 +165,7 @@ func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(5)
 
-	for i :=0; i<5;i++{
+	for i := 0; i < 5; i++ {
 		go downimag(taskq, wg, tmpdir)
 	}
 	cleanUrl(taskq, url, urls)
@@ -181,7 +176,7 @@ func main() {
 	close(taskq)
 	wg.Wait()
 
-	fmt.Println("sub time seconds>>>>>", int(time.Now().Unix()) - int(t1))
+	fmt.Println("sub time seconds>>>>>", int(time.Now().Unix())-int(t1))
 	TarFile := filepath.Base(tmpdir)
 
 	if err := maketar(tmpdir, TarFile); err != nil {
