@@ -12,17 +12,16 @@ import (
 
 const routineNum = 8
 
-var usage = `
-cli usage:
-  > create clsName 	-- add class with name
-  > select clsName 	-- change to class or create a new class
-  > show		-- show all class
-  > add stuName id 	-- add student info
-  > list 		-- list student info
-  > update stuName id 	-- update student name by id
-  > delete stuName id 	-- delete student by name or id
-  > load file 	   	-- load from file
-  > save file 	   	-- save info file
+var usage = `  cli usage:
+    > create clsName 	-- add class with name
+    > select clsName 	-- change to class or create a new class
+    > show		-- show all class
+    > add stuName id 	-- add student info
+    > list 		-- list student info
+    > update stuName id 	-- update student name by id
+    > delete stuName id 	-- delete student by name or id
+    > load file 	   	-- load from file
+    > save file 	   	-- save info file
 `
 
 var grd grade.Grade
@@ -37,7 +36,7 @@ func main() {
 	defer listener.Close()
 
 	var grd grade.Grade
-	fmt.Println("start:", grd)
+	fmt.Println("start:")
 
 	actionMap = map[string]func(string, []string) ([]byte, error){
 		"create": grd.Create,
@@ -57,6 +56,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 		}
+		log.Print("class: new connection.\n")
 		go handleConn(conn)
 	}
 }
@@ -82,7 +82,7 @@ func handleConn(conn net.Conn) {
 		}
 		retBytes, err := actionFunc(curClass, args)
 		if err != nil {
-			errStr = fmt.Sprintf("class: [%s] [%s] error: %s\n", curClass, cmd, err)
+			errStr = fmt.Sprintf("  class: [%s] [%s] error: %s\n", curClass, cmd, err)
 			log.Printf(errStr)
 			conn.Write([]byte(errStr))
 			continue

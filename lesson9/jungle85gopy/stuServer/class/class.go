@@ -3,11 +3,13 @@ package class
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
+	"sync"
 )
 
 // OK for return
-var OK = []byte("OK\n")
+var OK = []byte(" OK\n")
 
 // Student struct for student info. id is unique.
 type Student struct {
@@ -19,6 +21,7 @@ type Student struct {
 type Class struct {
 	allStus   []*Student `json:"allstudents"`
 	className string     `json:"classname"`
+	flag      sync.Mutex
 }
 
 // mothods for class
@@ -55,6 +58,9 @@ func (cls *Class) Add(args []string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("id error")
 	}
+
+	cls.flag.Lock()
+	defer cls.flag.Unlock()
 	if idx := cls.search(nid); idx != -1 {
 		return nil, fmt.Errorf("duplicated record: %s in %s", name, cls.className)
 	}
@@ -73,7 +79,7 @@ func (cls *Class) List([]string) ([]byte, error) {
 	if len(cls.allStus) == 0 {
 		return nil, fmt.Errorf("no student in class %s", cls.className)
 	}
-	retStr := fmt.Sprintf("[%s] student info:\n\tName\tID:\n", cls.className)
+	retStr := fmt.Sprintf(" [%s] student info:\n\tName\tID:\n", cls.className)
 	for _, val := range cls.allStus {
 		retStr += fmt.Sprintf("\t%s\t%d\n", val.Name, val.ID)
 	}
@@ -90,6 +96,9 @@ func (cls *Class) Update(args []string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("id error")
 	}
+
+	cls.flag.Lock()
+	defer cls.flag.Unlock()
 	idx := cls.search(nid)
 	if idx == -1 {
 		return nil, fmt.Errorf("no record for %s in %s", name, cls.className)
@@ -108,6 +117,9 @@ func (cls *Class) Delete(args []string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("id error")
 	}
+
+	cls.flag.Lock()
+	defer cls.flag.Unlock()
 	idx := cls.search(nid)
 	if idx == -1 {
 		return nil, fmt.Errorf("no record for id:%d in %s", nid, cls.className)
@@ -139,7 +151,7 @@ func (cls *Class) UnmarshalJSON(data []byte) error {
 		ClassName string     `json:"classname"`
 	}
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		fmt.Println("err of UN,", err)
+		log.Println("err of UN,", err)
 		return err
 	}
 	cls.allStus = tmp.AllStus

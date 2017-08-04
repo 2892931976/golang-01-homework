@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/51reboot/golang-01-homework/lesson9/jungle85gopy/stuServer/class"
 )
@@ -14,6 +15,7 @@ import (
 type Grade struct {
 	// allClasses map from class name to data
 	allClasses map[string]*class.Class
+	flag       sync.Mutex
 }
 
 func (g *Grade) searchClass(name string) bool {
@@ -47,6 +49,9 @@ func (g *Grade) Create(_ string, args []string) ([]byte, error) {
 		return nil, fmt.Errorf("args not enougth")
 	}
 	name := args[0]
+
+	g.flag.Lock()
+	defer g.flag.Unlock()
 	if existed := g.searchClass(name); existed {
 		return nil, fmt.Errorf("class name: %s existed", name)
 	}
@@ -74,9 +79,9 @@ func (g *Grade) Change(cur string, args []string) ([]byte, error) {
 // Show show all classes
 func (g *Grade) Show(_ string, _ []string) ([]byte, error) {
 	if len(g.allClasses) == 0 {
-		return []byte("no class here\n"), nil
+		return nil, fmt.Errorf("no class here")
 	}
-	retStr := "class name info:\n"
+	retStr := " class name info:\n"
 	for cName := range g.allClasses {
 		retStr += fmt.Sprintf("\t%s\n", cName)
 	}
@@ -156,6 +161,8 @@ func (g *Grade) Save(_ string, args []string) ([]byte, error) {
 	defer fd.Close()
 
 	// saving
+	g.flag.Lock()
+	defer g.flag.Unlock()
 	buf, err := json.Marshal(g)
 	if err != nil {
 		return nil, fmt.Errorf("marshal stu info error")
@@ -181,6 +188,9 @@ func (g *Grade) Load(_ string, args []string) ([]byte, error) {
 	if buf, err = ioutil.ReadFile(name); err != nil {
 		return nil, fmt.Errorf("read from file error")
 	}
+
+	g.flag.Lock()
+	defer g.flag.Unlock()
 	if err := json.Unmarshal(buf, g); err != nil {
 		return nil, fmt.Errorf("unmarshal stu error")
 	}
