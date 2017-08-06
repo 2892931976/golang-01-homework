@@ -106,7 +106,7 @@ func handConn(conn net.Conn) {
 		io.Copy(serverConn, conn)
 		serverConn.Close()
 	}()
-	
+
 	go func() {
 		defer wg.Done()
 		io.Copy(conn, serverConn)
