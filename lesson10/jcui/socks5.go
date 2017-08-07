@@ -138,7 +138,7 @@ func handleConn(conn net.Conn) {
 
 func main() {
 	//建立监听
-	addr := ":9000"
+	addr := ":7777"
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
