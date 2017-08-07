@@ -79,6 +79,7 @@ func readAddr(r *bufio.Reader) (string, error) {
 }
 
 func handleConn(conn net.Conn) {
+	defer conn.Close()
 	/*
 		参考链接地址: http://www.jianshu.com/p/172810a70fad
 
@@ -103,6 +104,7 @@ func handleConn(conn net.Conn) {
 	addr, err := readAddr(r)
 	if err != nil {
 		log.Print("Addr Error:", err)
+		return
 	}
 	log.Printf("addr:", addr)
 	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -113,6 +115,7 @@ func handleConn(conn net.Conn) {
 	remote, err = net.Dial("tcp", addr)
 	if err != nil {
 		log.Print("Error:", err)
+		return
 	}
 
 	wg := new(sync.WaitGroup)
