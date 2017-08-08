@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/md5"
 	"crypto/rc4"
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -13,22 +12,25 @@ import (
 	"time"
 )
 
-func Crypto(w io.Writer, r io.Reader, key string) {
+func Crypto(conn net.Conn, r io.Reader, key string) {
+	//创建cipher
 	md5sum := md5.Sum([]byte(key))
-	cipher, err := rc4.NewCipher(md5sum[:])
+	cipher, err := rc4.NewCipher([]byte(md5sum[:]))
 	if err != nil {
-		log.Print("Crypto error:", err)
-		return
+		log.Fatal(err)
 	}
+	//创建buf
 	buf := make([]byte, 4096)
-
 	for {
+		// 从r里面读取数据到buf
 		n, err := r.Read(buf)
 		if err == io.EOF {
 			break
 		}
+		// 加密buf
 		cipher.XORKeyStream(buf[:n], buf[:n])
-		w.Write(buf)
+		// 把buf写入到w里面
+		conn.Write(buf[:n])
 	}
 
 }
@@ -46,32 +48,37 @@ func GetRandomString(n int) string {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-
-	//加密的过程
-	key := GetRandomString(10)
-	r_buf := bufio.NewReader(conn)
-	fmt.Println(key, r_buf)
-
-	//向服务器端发送数据
-	server, err := net.Dial("tcp", "fps6.uc.ppweb.com.cn:7777")
+	remote, err := net.Dial("tcp", "127.0.0.1:9999")
 	if err != nil {
 		log.Print("Error:", err)
 		return
 	}
+	//key := GetRandomString(10)
+	key := "ABCDefgQWERasdf"
+	//fmt.Println(key)
+	//remote.Write([]byte(key))
+	//加密的过程
+
+	r_buf := bufio.NewReader(conn)
+	Crypto(remote, r_buf, key)
+	//fmt.Println(server)
+
+	//向服务器端发送数据
+
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	//go 接收客户端的数据,发送到remote,直到conn的EOF
 	go func() {
 		defer wg.Done()
-		io.Copy(server, conn)
-		server.Close()
+		io.Copy(remote, conn)
+		remote.Close()
 	}()
 	//解密的过程
 
 	//go 接收remote的数据,发送到客户端,直到remote的EOF
 	go func() {
 		defer wg.Done()
-		io.Copy(conn, server)
+		io.Copy(conn, remote)
 		conn.Close()
 	}()
 	//等待两个协程结束
