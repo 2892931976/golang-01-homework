@@ -19,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	rd := bufio.NewReader(conn)
 	defer conn.Close()
 
 	buf := make([]byte, 1024)
@@ -32,9 +33,9 @@ func main() {
 	//}
 	switch action {
 	case "STORE":
-
+		sendToServer(fileName, conn)
 	case "GET":
-
+		getFromServer(fileName, conn, rd)
 	case "LS":
 	}
 	_, err = conn.Write([]byte(action + " " + filepath.Base(fileName) + "\n"))
