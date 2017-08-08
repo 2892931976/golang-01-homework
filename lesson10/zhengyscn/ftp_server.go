@@ -5,7 +5,6 @@ import (
 
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -14,18 +13,14 @@ import (
 )
 
 func GetFile(conn net.Conn, r *bufio.Reader, name string) error {
+	defer conn.Close()
 	f, err := os.Open(name)
 	if err != nil {
 		log.Print(err)
 		return err
 	}
 	defer f.Close()
-	buf, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-	conn.Write(buf)
+	io.Copy(conn, f)
 	return nil
 }
 
@@ -35,15 +30,16 @@ func StoreFile(conn net.Conn, r *bufio.Reader, name string) error {
 	// 向文件写入数据
 	// 往conn写入OK
 	// 关闭连接和文件
+	defer conn.Close()
 	err := os.MkdirAll(filepath.Dir(name), 0755)
 	if err != nil {
-		log.Print(err)
+		log.Printf("mkdirall error %v\n", err)
 		return err
 	}
-	f, err := os.Create(filepath.Dir(name))
-	//f, err := os.Create("aaa.txt")
+
+	f, err := os.Create(name)
 	if err != nil {
-		log.Print(err)
+		log.Printf("create file %v\n", err)
 		return err
 	}
 	defer f.Close()
@@ -105,7 +101,7 @@ func handleConn(conn net.Conn) {
 }
 
 func main() {
-	listener, err := net.Listen("tcp", ":8000")
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
