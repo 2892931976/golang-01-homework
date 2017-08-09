@@ -14,7 +14,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	//"io/ioutil"
 	"fmt"
 	"path/filepath"
 )
@@ -32,63 +31,50 @@ func handel_conn(conn net.Conn) {
 	}
 	fmt.Println(line)
 	line = strings.TrimSpace(line) //去掉换行符
-	fields := strings.Fields(line) //按照空格分隔字符串
-	if len(fields) != 2 {
-		conn.Write([]byte("bad input!"))
-		return
-	}
+	fields := strings.Fields(line) //按照空格分隔字符串。
 	cmd := fields[0] //定义用户输入的
-	name := fields[1]
-	if cmd == "GET" {
-		f, err := os.Open(name)
+	file_name := fields[1]
+	switch cmd {
+	case "GET","get":
+		f, err := os.Open(file_name)
 		if err != nil {
 			log.Print(err)
 			return
 		}
-		defer f.Close()
 		/*
 		   处理文件的方式一：
-		   		buf := make([]byte,4096) //定义一个切片大小，用于按块读取数据。
-		   		for{
-		   			n,err := f.Read(buf)
-		   			if err == io.EOF {  //指定循环结束条件，当读取到文件的结束标识符是中断循环。
-		   				break
-		   			}
-		   			conn.Write(buf[:n]) //讲读取到的内容发送给客户端。
-		   		}
+				buf := make([]byte,4096) //定义一个切片大小，用于按块读取数据。
+				for{
+					n,err := f.Read(buf)
+					if err == io.EOF {  //指定循环结束条件，当读取到文件的结束标识符是中断循环。
+						break
+					}
+					conn.Write(buf[:n]) //讲读取到的内容发送给客户端。
+				}
 
 		   处理文件的方式二：
-		   		buf,err := ioutil.ReadAll(f) //将文件全部读取出来，但仅仅适合读取小文件。不推荐使用、
-		   		if err != nil {
-		   			log.Print(err)
-		   			return
-		   		}
-		   		conn.Write(buf)
+				buf,err := ioutil.ReadAll(f) //将文件全部读取出来，但仅仅适合读取小文件。不推荐使用、
+				if err != nil {
+					log.Print(err)
+					return
+				}
+				conn.Write(buf)
 		*/
 		io.Copy(conn, f) //其运行机制就是循环读取按块读取“f”中的内容然后讲读取的数据传递给“conn”,此种方式最为高效率。
-
-	} else if cmd == "STORE" {
-		os.MkdirAll(filepath.Dir(name), 0755) //获取name的目录，并在服务器中创建出来。
-		f, err := os.Create(name)
+		f.Close()
+		fmt.Println("读取完毕！")
+	case  "STORE","store" :
+		os.MkdirAll(filepath.Dir(file_name), 0755) //获取name的目录，并在服务器中创建出来。
+		f1, err := os.Create(file_name)
 		if err != nil {
 			log.Print(err)
 			return
 		}
-		io.Copy(f, r) //讲链接读取到的内容写入到刚刚创建的文件中。
-		defer f.Close()
-		/*
-			1.从"r"读取文件内容直到err为io.EOF
-			2.创建name文件
-			3.向文件写入数据
-			4.往conn写入OK
-			5.关闭连接和文件。
-		*/
-		conn.Write([]byte("这是上传文件的方法"))
+		io.Copy(f1, r) //讲链接读取到的内容写入到刚刚创建的文件中。
+		f1.Close()
+		//conn.Close()
+		fmt.Println("STORE命令执行完毕!")
 	}
-
-	var content []byte
-	//读取文件内容到conntent
-	conn.Write(content)
 }
 
 func main() {
