@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"crypto/md5"
 	"crypto/rc4"
 	"io"
@@ -54,13 +53,13 @@ func handleConn(conn net.Conn) {
 		return
 	}
 	//key := GetRandomString(10)
-	key := "ABCDefgQWERasdf"
+	//key := "ABCDefgQWERasdf"
 	//fmt.Println(key)
 	//remote.Write([]byte(key))
 	//加密的过程
 
-	r_buf := bufio.NewReader(conn)
-	Crypto(remote, r_buf, key)
+	//r_buf := bufio.NewReader(conn)
+	//Crypto(remote, r_buf, key)
 	//fmt.Println(server)
 
 	//向服务器端发送数据
