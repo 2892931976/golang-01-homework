@@ -1,3 +1,10 @@
+/*
+#!/usr/bin/env gorun
+@author :yinzhengjie
+Blog:http://www.cnblogs.com/yinzhengjie/tag/GO%E8%AF%AD%E8%A8%80%E7%9A%84%E8%BF%9B%E9%98%B6%E4%B9%8B%E8%B7%AF/
+EMAIL:y1053419035@qq.com
+*/
+
 package main
 
 import (
@@ -6,8 +13,7 @@ import (
 	"log"
 	"net"
 	"strings"
-	//"io"
-	//"time"
+	"time"
 )
 
 var globalRoom *Room = NewRoom()
@@ -23,9 +29,6 @@ func NewRoom() *Room {
 }
 
 func (r *Room) Join(user string, conn net.Conn) {
-	//if r.users[user] != nil{
-	//	r.Leave(user)
-	//}
 	_, ok := r.users[user]
 	if ok {
 		r.Leave(user) //如果存在用户user就提出之前的链接，调用Leave方法实现。
@@ -40,15 +43,14 @@ func (r *Room) Leave(user string) {
 	if !ok {
 		fmt.Printf("%v用户不存在！", user)
 	}
-	conn.Close() //如果存在用户就断开链接。
-
-	//r.users[user].Close()
+	conn.Close()          //如果存在用户就断开链接。
 	delete(r.users, user) //将用户从字典中删除。
 	fmt.Printf("%s 离开", user)
 }
 
 func (r *Room) Broadcast(who string, msg string) {
-	tosend := fmt.Sprintf("%s:%s\n", who, msg)
+	time_info := time.Now().Format("2006年01月02日 15:04:05") //这个是对日期定义一个格式化输出。告诉你一个记住它的方法：2006-01-02 15:04:05对应着2006 1(01) 2(02) 3(15) 4(04) 5(05) 哈哈
+	tosend := fmt.Sprintf("%v %s:%s\n", time_info, who, msg)
 	for user, conn := range r.users { //遍历所有用户，
 		if user == who {
 			continue //当发现用户是自己就不发送数据。即跳过循环。
@@ -79,19 +81,21 @@ func Handle_Conn(conn net.Conn) {
 	globalRoom.Join(user, conn)
 	globalRoom.Broadcast("System", fmt.Sprintf("%s join room", user))
 	for { //获取用户的输入。
-		line, err := r.ReadString('\n') //循环读取用户输入的内容。换行符为“\n”
-		if err != nil {                 //当用户主动关闭连接是，会出现报错就直接直接终止循环。
+		conn.Write([]byte("按回车键发送消息：>>>")) //这里是给客户端增加一个提示符
+		line, err := r.ReadString('\n')    //循环读取用户输入的内容。换行符为“\n”
+		if err != nil {                    //当用户主动关闭连接是，会出现报错就直接直接终止循环。
 			break
 		}
-		line = strings.TrimSpace(line)   //去掉换行符
-		globalRoom.Broadcast(user, line) // 将输入进行广播。
+		line = strings.TrimSpace(line) //去掉换行符
+		fmt.Println(user, line)
+		globalRoom.Broadcast(user, line) // 将用户输入的消息进行广播。
 	}
 	globalRoom.Broadcast("System", fmt.Sprintf("%s Leave room", user))
 	globalRoom.Leave(user) //踢掉用户。
 }
 
 func main() {
-	addr := "0.0.0.0:8033"
+	addr := "0.0.0.0:8888"
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
