@@ -2,11 +2,16 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"io"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
+)
+
+var (
+	root = flag.String("r", "./", "root of files")
 )
 
 func main() {
@@ -26,26 +31,59 @@ func main() {
 
 	action := os.Args[1]
 
-	FileName := os.Args[2]
-	//_, err = conn.Write([]byte(action + " " + filepath.Base(fileName) + "\n"))
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	switch action {
-	case "STORE":
-		sendToServer(fileName, conn)
-	case "GET":
-		getFromServer(fileName, conn, rd)
-	case "LS":
-	}
+	fileName := os.Args[2]
 	_, err = conn.Write([]byte(action + " " + filepath.Base(fileName) + "\n"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	switch action {
+	case "STORE":
+		//sendToServer(fileName, conn)
+		fd, err := os.Open(fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer fd.Close()
+		defer conn.Close()
+
+		//buf := make([]byte, 1024)
+		num, _ := io.Copy(conn, fd)
+		log.Print("write num:", num)
+
+		value, _ := conn.(*net.TCPConn)
+		value.CloseWrite()
+		log.Print("after close write")
+
+		n, err := conn.Read(buf)
+		if err != nil || err == io.EOF {
+			log.Print("err :", err)
+		}
+		log.Printf("return content:%s", string(buf[:n]))
+	case "GET":
+		//getFromServer(fileName, conn, rd)
+		fd, err := os.Create(*root + fileName)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		defer fd.Close()
+		n, err := io.Copy(fd, rd)
+		log.Print("read num :", n)
+		conn.Write([]byte("ok"))
+		conn.Close()
+
+	case "LS":
+		n, err := conn.Read(buf)
+		if err != nil || err == io.EOF {
+			log.Print("err : ", err)
+		}
+		log.Printf("return content :%s", string(buf[:n]))
+
+	}
 }
 
 func writeError(conn net.Conn, err string) {
-	con.Write([]byte("err: " + err))
+	conn.Write([]byte("err: " + err))
 	conn.Close()
 }
 
