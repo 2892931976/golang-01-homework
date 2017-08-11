@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -90,7 +89,7 @@ func handleConn(conn net.Conn) {
 	r := bufio.NewReader(conn)
 	handshake(r, conn)
 	addr, _ := readAddr(r)
-	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00}
+	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	conn.Write(resp)
 	proxy(conn, addr)
 }
@@ -122,10 +121,10 @@ func proxy(conn net.Conn, address string) {
 }
 
 func main() {
-	flag.Parse()
-	//建立listen
-	addr := ":7777"
-	listener, err := net.Listen("tcp", addr)
+	// flag.Parse()
+	// //建立listen
+	// addr := ":7777"
+	listener, err := net.Listen("tcp", ":7777")
 	if err != nil {
 		log.Fatal(err)
 	}
