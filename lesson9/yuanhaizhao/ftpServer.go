@@ -20,7 +20,6 @@ var (
 func handConn(conn net.Conn) { //conn类型为net.conn
 	//从conn读取一行内容
 	//按空格分隔指令和文件名
-
 	defer conn.Close() //函数退出，关闭连接
 	r := bufio.NewReader(conn)
 	content, err := r.ReadString('\n')
@@ -34,7 +33,7 @@ func handConn(conn net.Conn) { //conn类型为net.conn
 		conn.Write([]byte("bad input"))
 		return
 	}
-
+	fmt.Println(cmdfn[0], cmdfn[1])
 	switch cmdfn[0] {
 	case "GET":
 		//打开文件
@@ -42,7 +41,6 @@ func handConn(conn net.Conn) { //conn类型为net.conn
 		//发送内容
 		//关闭连接和文件
 		f, err := os.Open(*root + cmdfn[1])
-		log.Print(*root)
 		if err != nil && err != io.EOF {
 			log.Print(err)
 			return
