@@ -1,4 +1,4 @@
-package mycyypto
+package mycrypto
 
 import (
 	"crypto/md5"
