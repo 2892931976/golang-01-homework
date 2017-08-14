@@ -86,7 +86,7 @@ func handshake(r *bufio.Reader, conn net.Conn) error {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 	r := bufio.NewReader(conn)
-	//handshake(r, conn)
+	handshake(r, conn)
 	addr, _ := readAddr(r)
 	log.Printf("addr: %s", string(addr))
 	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
