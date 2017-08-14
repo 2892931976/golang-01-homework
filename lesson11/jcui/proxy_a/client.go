@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/51reboot/golang-01-homework/lesson10/jcui/mycrypto"
 	"io"
 	"log"
 	"net"
 	"sync"
-	"github.com/51reboot/golang-01-homework/lesson10/jcui/mycrypto"
 )
 
 func handleConn(conn net.Conn) {
