@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"golang-01/lesson10/jcui/mycrypto"
 	"io"
 	"log"
 	"net"
 	"sync"
+	"github.com/51reboot/golang-01-homework/lesson10/jcui/mycrypto"
 )
 
 //当前函数复制接收数据并进行解密操作
