@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"crypto/rc4"
 	"io"
+	"os"
 )
 
 type CryptoWriter struct {
@@ -53,4 +54,13 @@ func (r *CryptoReader) Read(b []byte) (int, error) {
 	buf := b[:n]
 	r.cipher.XORKeyStream(buf, buf)
 	return n, err
+}
+
+func main() {
+	var key = "123456"
+	r := NewCryptoReader(os.Stdin, key)
+	io.Copy(os.Stdout, r)
+
+	w := NewCryptoWriter(os.Stdout, key)
+	io.Copy(w, os.Stdin)
 }
