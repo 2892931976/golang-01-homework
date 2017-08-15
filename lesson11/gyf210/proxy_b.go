@@ -27,14 +27,14 @@ func handle(conn net.Conn) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		w := mycrypto.NewCryptoWriter(remote, *key)
-		io.Copy(w, conn)
+		r := mycrypto.NewCryptoReader(conn, *key)
+		io.Copy(remote, r)
 		remote.Close()
 	}()
 	go func() {
 		defer wg.Done()
-		r := mycrypto.NewCryptoReader(remote, *key)
-		io.Copy(conn, r)
+		w := mycrypto.NewCryptoWriter(conn, *key)
+		io.Copy(w, remote)
 		conn.Close()
 	}()
 	wg.Wait()
