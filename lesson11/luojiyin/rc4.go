@@ -4,9 +4,14 @@ import (
 	//"crypto/md5"
 	"crypto/md5"
 	"crypto/rc4"
+	"flag"
 	"io"
 	"log"
 	"os"
+)
+
+var (
+	key = flag.String("k", "", "secret key")
 )
 
 func crypto(w io.Writer, r io.Reader, key string) {
@@ -28,5 +33,6 @@ func crypto(w io.Writer, r io.Reader, key string) {
 }
 
 func main() {
-	crypto(os.Stdout, os.Stdin, "123456")
+	flag.Parse()
+	crypto(os.Stdout, os.Stdin, *key)
 }
