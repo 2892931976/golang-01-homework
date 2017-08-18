@@ -10,13 +10,30 @@ import (
 	"net"
 )
 
-func readAddr(r *bufio.Reader) (string, error) {
-	version, _ := r.ReadByte()
+func mustReadByte(r *bufio.Reader) byte {
+	b, err := r.ReadByte()
+	if err != nil {
+		panic(err)
+	}
+
+	return b
+}
+func readAddr(r *bufio.Reader) (addr string, err error) {
+	defer func() {
+		e := recover() // interface{}
+		if e != nil {
+			err = e.(error)
+		}
+
+	}()
+	// version, _ := r.ReadByte()
+	version := mustReadByte(r)
 	log.Printf("readAddr version: %d", version)
 	if version != 5 {
 		return "", errors.New("bad Version")
 	}
-	cmd, _ := r.ReadByte()
+	// cmd, _ := r.ReadByte()
+	cmd := mustReadByte(r)
 	switch cmd {
 	case 1:
 		log.Printf("readAddr cmd: %d, CONNECT", cmd)
