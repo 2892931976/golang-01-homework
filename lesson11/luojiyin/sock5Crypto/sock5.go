@@ -157,7 +157,7 @@ func NewCrytoReader(r io.Reader, key string) io.Reader {
 	}
 }
 
-func (r *CryptoReader) read(b []byte) (int, error) {
+func (r *CryptoReader) Read(b []byte) (int, error) {
 	n, err := r.r.Read(b)
 	buf := b[:n]
 	r.cipher.XORKeyStream(buf, buf)
