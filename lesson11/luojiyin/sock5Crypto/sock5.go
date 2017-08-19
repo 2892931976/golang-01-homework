@@ -89,8 +89,9 @@ func handshake(r *bufio.Reader, conn net.Conn) error {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	r := bufio.NewReader(conn)
-	handshake(r, conn)
+	remoteCryReader := NewCrytoReader(conn, key)
+	r := bufio.NewReader(remoteCryReader)
+	//handshake(r, conn)
 	addr, _ := readAddr(r)
 	log.Printf("addr: %s", string(addr))
 	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -101,8 +102,9 @@ func handleConn(conn net.Conn) {
 		return
 	}
 	defer server.Close()
-	go io.Copy(server, conn)
-	io.Copy(conn, server)
+	go io.Copy(server, remoteCryReader)
+	cryWriter := NewCrytoWrite(conn, key)
+	io.Copy(cryWriter, server)
 }
 
 func main() {
@@ -157,7 +159,7 @@ func NewCrytoReader(r io.Reader, key string) io.Reader {
 	}
 }
 
-func (r *CryptoReader) read(b []byte) (int, error) {
+func (r *CryptoReader) Read(b []byte) (int, error) {
 	n, err := r.r.Read(b)
 	buf := b[:n]
 	r.cipher.XORKeyStream(buf, buf)
