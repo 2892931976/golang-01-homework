@@ -11,7 +11,7 @@ import (
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 	//这里的9999 指请求远端sevrer的端口
-	remote, err := net.Dial("tcp", ":9999")
+	remote, err := net.Dial("tcp", "127.0.0.1:9999")
 	if err != nil {
 		log.Print(err)
 		return
