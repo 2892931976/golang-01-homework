@@ -89,12 +89,15 @@ func handshake(r *bufio.Reader, conn net.Conn) error {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	r := bufio.NewReader(conn)
-	handshake(r, conn)
+	r := bufio.NewReader(NewCrytoReader(conn, key))
+	w := nil
+	handshake(r, w)
 	addr, _ := readAddr(r)
 	log.Printf("addr: %s", string(addr))
 	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	conn.Write(resp)
+	crywrite := NewCrytoWrite(conn, key)
+	//conn.Write(resp)
+	crywrite.Write(resp)
 	server, err := net.Dial("tcp", addr)
 	if err != nil {
 		log.Print(err)
