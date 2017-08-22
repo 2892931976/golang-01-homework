@@ -14,11 +14,49 @@ import (
 	"github.com/51reboot/golang-01-homework/lesson11/luojiyin/common"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/load"
 )
 
 type Sender struct {
 	addr string
 	ch   chan *common.Metric
+}
+
+func NewMetric(metric string, value float64) *commom.Metric {
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Print(err)
+	}
+	return &common.Metric{
+		Metric:    metric,
+		Endpoint:  hostname,
+		Value:     value,
+		Tag:       []string{runtime.GOOS},
+		Timestamp: time.Now().Unix(),
+	}
+}
+
+func CpuMetric() []*common.Metric {
+	var ret []*common.Metric
+	cpus, err := cpu.Percent(time.Second, false)
+	if err != nil {
+		log.Print(err)
+	}
+	metric := NewMetric("cpu.usage", cpus[0])
+	ret = append(ret, metric)
+
+	cpuload, err := load.Avg()
+	if err != nil {
+		log.Print(err)
+	} else {
+		metric = NewMetric("cpu.load1", cpuload.Load1)
+		ret = append(ret, metric)
+		metric = NewMetric("cpu.load5", cpuload.Load5)
+		ret = append(ret, metric)
+		metric = NewMetric("cpuload15", cpuload.Load15)
+		ret = append(ret, metric)
+	}
+	return ret
 }
 
 var (
@@ -120,21 +158,21 @@ func main() {
 	}
 }
 
-func getcpuUsage() *common.Metric {
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Print(err)
-	}
-	cpus, err := cpu.Percent(time.Second, false)
-	if err != nil {
-		log.Print(err)
-	}
-	metric := &common.Metric{
-		Metric:    "cpu.usage",
-		Endpoint:  hostname,
-		Value:     cpus[0],
-		Tag:       []string{runtime.GOOS},
-		Timestamp: time.Now().Unix(),
-	}
-	return metric
-}
+//func getcpuUsage() *common.Metric {
+//	hostname, err := os.Hostname()
+//	if err != nil {
+//		log.Print(err)
+//	}
+//	cpus, err := cpu.Percent(time.Second, false)
+//	if err != nil {
+//		log.Print(err)
+//	}
+//	metric := &common.Metric{
+//		Metric:    "cpu.usage",
+//		Endpoint:  hostname,
+//		Value:     cpus[0],
+//		Tag:       []string{runtime.GOOS},
+//		Timestamp: time.Now().Unix(),
+//	}
+//	return metric
+//}
