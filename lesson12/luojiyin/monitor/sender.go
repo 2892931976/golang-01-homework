@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/51reboot/golang-01-homework/lesson11/luojiyin/common"
+	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
