@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -10,14 +11,19 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/monitor/common"
+	"github.com/51reboot/golang-01-homework/lesson11/luojiyin/common"
 	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
 )
 
 type Sender struct {
 	addr string
 	ch   chan *common.Metric
 }
+
+var (
+	addr = flag.String("trans", "59.110.12.72:6000", "transfer server")
+)
 
 func NewSender(addr string) *Sender {
 	return &Sender{
@@ -78,30 +84,57 @@ func (s *Sender) Channel() chan *common.Metric {
 }
 
 func main() {
-	addr := "59.110.12.72:6000"
-	sender := NewSender(addr)
+	flag.Parse()
+	//addr := "59.110.12.72:6000"
+	sender := NewSender(*addr)
 	go sender.Start()
 	ch := sender.Channel()
 
+	diskStat, err := disk.Usage("/dev/mapper/centos-root")
+	if err != nil {
+		log.Print(err)
+	}
+	log.Print(diskStat)
 	ticker := time.NewTicker(time.Second)
 	for range ticker.C {
-		hostname, err := os.Hostname()
-		if err != nil {
-			log.Print(err)
-		}
-		cpus, err := cpu.Percent(time.Second, false)
-		if err != nil {
-			log.Print(err)
-		}
-		metric := &common.Metric{
-			Metric:    "cpu.usage",
-			Endpoint:  hostname,
-			Value:     cpus[0],
-			Tag:       []string{runtime.GOOS},
-			Timestamp: time.Now().Unix(),
-		}
+		//hostname, err := os.Hostname()
+		//if err != nil {
+		//	log.Print(err)
+		//}
+		//cpus, err := cpu.Percent(time.Second, false)
+		//if err != nil {
+		//	log.Print(err)
+		//}
+		//metric := &common.Metric{
+		//	Metric:    "cpu.usage",
+		//	Endpoint:  hostname,
+		//	Value:     cpus[0],
+		//	Tag:       []string{runtime.GOOS},
+		//	Timestamp: time.Now().Unix(),
+		//}
+		metric := getcpuUsage()
+
 		ch <- metric
 		buf, _ := json.Marshal(metric)
 		log.Println(string(buf))
 	}
+}
+
+func getcpuUsage() *common.Metric {
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Print(err)
+	}
+	cpus, err := cpu.Percent(time.Second, false)
+	if err != nil {
+		log.Print(err)
+	}
+	metric := &common.Metric{
+		Metric:    "cpu.usage",
+		Endpoint:  hostname,
+		Value:     cpus[0],
+		Tag:       []string{runtime.GOOS},
+		Timestamp: time.Now().Unix(),
+	}
+	return metric
 }
