@@ -7,10 +7,11 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/51reboot/golang-01-homework/lesson11/luojiyin/common"
+	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
 	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/monitor"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/mem"
 )
 
 var (
@@ -22,7 +23,7 @@ func NewMetric(metric string, value float64) *common.Metric {
 	if err != nil {
 		log.Print(err)
 	}
-
+	log.Print(string(hostname))
 	return &common.Metric{
 		Metric:    metric,
 		Endpoint:  hostname,
@@ -32,8 +33,8 @@ func NewMetric(metric string, value float64) *common.Metric {
 	}
 }
 
-func CpuMetric() []*commom.Metric {
-	var ret []*commom.Metric
+func CpuMetric() []*common.Metric {
+	var ret []*common.Metric
 	cpus, err := cpu.Percent(time.Second, false)
 	if err != nil {
 		log.Print(err)
@@ -56,11 +57,25 @@ func CpuMetric() []*commom.Metric {
 	return ret
 }
 
+func MemMetric() []*common.Metric {
+	var ret []*common.Metric
+	m, err := mem.VirtualMemory()
+	if err != nil {
+		log.Print(err)
+
+	}
+	metric := NewMetric("mem.usage", m.UsedPercent)
+	ret = append(ret, metric)
+	return ret
+}
+
 func main() {
-	flage.Parse()
+	flag.Parse()
 	sender := monitor.NewSender(*addr)
 	ch := sender.Channel()
 
 	scheder := monitor.NewSched(ch)
-	go scheder.AddMetric(CpuMetric(), time.Second*2)
+	go scheder.AddMetric(CpuMetric, time.Second*2)
+	go scheder.AddMetric(MemMetric, time.Second)
+	sender.Start()
 }
