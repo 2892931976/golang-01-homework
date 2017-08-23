@@ -47,7 +47,7 @@ func CpuMetric() []*common.Metric {
 		ret = append(ret, metric)
 		metric = NewMetric("cpu.load5", cpuload.Load5) //采集五分钟内cpu的Load指标，当然只会采集到linux的load，在windows上是没有load指标的。
 		ret = append(ret, metric)
-		metric = NewMetric("cpu.load5", cpuload.Load15) //采集十五分钟内cpu的Load指标，当然只会采集到linux的load，在windows上是没有load指标的。
+		metric = NewMetric("cpu.load15", cpuload.Load15) //采集十五分钟内cpu的Load指标，当然只会采集到linux的load，在windows上是没有load指标的。
 		ret = append(ret, metric)
 	}
 	return ret
