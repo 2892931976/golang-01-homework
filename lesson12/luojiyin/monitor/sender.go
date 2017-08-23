@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
-	//	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/cpu"
 	//	"github.com/shirou/gopsutil/disk"
-	//	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/load"
 )
 
 type Sender struct {
@@ -22,7 +22,7 @@ type Sender struct {
 	ch   chan *common.Metric
 }
 
-func NewMetric(metric string, value float64) *commom.Metric {
+func NewMetric(metric string, value float64) *common.Metric {
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Print(err)
