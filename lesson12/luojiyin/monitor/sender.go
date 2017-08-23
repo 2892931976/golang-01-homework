@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/load"
+	//	"github.com/shirou/gopsutil/cpu"
+	//	"github.com/shirou/gopsutil/disk"
+	//	"github.com/shirou/gopsutil/load"
 )
 
 type Sender struct {

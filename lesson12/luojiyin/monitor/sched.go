@@ -21,9 +21,9 @@ func NewSched(ch chan *common.Metric) *Sched {
 func (s *Sched) AddMetric(collecter MetricFunc, step time.Duration) {
 	ticker := time.NewTicker(step)
 	for range ticker.C {
-		for _, m := range collecter() {
-			if m != nil {
-				s.ch <- m
+		for _, metric := range collecter() {
+			if metric != nil {
+				s.ch <- metric
 			}
 		}
 	}
