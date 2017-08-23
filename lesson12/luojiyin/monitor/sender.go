@@ -3,7 +3,6 @@ package monitor
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -58,10 +57,6 @@ func CpuMetric() []*common.Metric {
 	}
 	return ret
 }
-
-var (
-	addr = flag.String("trans", "59.110.12.72:6000", "transfer server")
-)
 
 func NewSender(addr string) *Sender {
 	return &Sender{
