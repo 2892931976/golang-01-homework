@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
+	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/monitor/common"
 	"github.com/shirou/gopsutil/cpu"
 	"log"
 	"net"

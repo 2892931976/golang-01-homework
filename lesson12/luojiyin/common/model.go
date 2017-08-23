@@ -5,5 +5,5 @@ type Metric struct {
 	Endpoint  string   `json:"endpoint"`
 	Tag       []string `json:"tag"`
 	Value     float64  `json:"value"`
-	Timestamp int64    `json:"timestap"`
+	Timestamp int64    `json:"timestamp"`
 }
