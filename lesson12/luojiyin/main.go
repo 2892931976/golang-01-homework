@@ -23,7 +23,7 @@ func NewMetric(metric string, value float64) *common.Metric {
 	if err != nil {
 		log.Print(err)
 	}
-	log.Print(string(hostname))
+	//log.Print(string(hostname))
 	return &common.Metric{
 		Metric:    metric,
 		Endpoint:  hostname,
@@ -65,6 +65,18 @@ func MemMetric() []*common.Metric {
 
 	}
 	metric := NewMetric("mem.usage", m.UsedPercent)
+	ret = append(ret, metric)
+
+	metric = NewMetric("mem.total", float64(m.Total))
+	ret = append(ret, metric)
+
+	metric = NewMetric("mem.used", float64(m.Used))
+	ret = append(ret, metric)
+
+	metric = NewMetric("mem.available", float64(m.Available))
+	ret = append(ret, metric)
+
+	metric = NewMetric("mem.free", float64(m.Free))
 	ret = append(ret, metric)
 	return ret
 }
