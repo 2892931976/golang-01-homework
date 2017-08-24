@@ -91,7 +91,7 @@ func (s *Sender) Start() {
 		select {
 		case metric := <-s.ch:
 			buf, _ := json.Marshal(metric)
-			log.Print(string(buf))
+			//log.Print(string(buf))
 			_, err := fmt.Fprintf(w, "%s\n", buf)
 			if err != nil {
 
