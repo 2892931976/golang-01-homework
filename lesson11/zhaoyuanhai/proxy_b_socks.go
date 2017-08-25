@@ -1,0 +1,214 @@
+package main
+
+import (
+	"bufio"
+	"crypto/md5"
+	"crypto/rc4"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"sync"
+)
+
+//1. 握手
+//2. 获取客户端的请求
+//3. 开始代理
+//
+//
+type CryptoWriter struct {
+	w      io.Writer
+	cipher *rc4.Cipher
+}
+
+type CryptoReader struct {
+	r      io.Reader
+	cipher *rc4.Cipher
+}
+
+func NewCryptoWriter(w io.Writer, key string) io.Writer {
+	md5sum := md5.Sum([]byte(key))
+	cipher, err := rc4.NewCipher(md5sum[:])
+	if err != nil {
+		panic(err)
+	}
+	return &CryptoWriter{
+		w:      w,
+		cipher: cipher,
+	}
+}
+
+//把b里面的数据进行加密，之后写入w.w里面
+//调用w.w.Write进行写入
+func (w *CryptoWriter) Write(b []byte) (int, error) {
+	buf := make([]byte, len(b))
+	w.cipher.XORKeyStream(buf, b)
+	return w.w.Write(buf)
+}
+
+func NewCryptoReader(r io.Reader, key string) io.Reader {
+	md5sum := md5.Sum([]byte(key))
+	cipher, err := rc4.NewCipher(md5sum[:])
+	if err != nil {
+		panic(err)
+	}
+	return &CryptoReader{
+		r:      r,
+		cipher: cipher,
+	}
+}
+
+func (r *CryptoReader) Read(b []byte) (int, error) {
+	n, err := r.r.Read(b)
+	buf := b[:n]
+	r.cipher.XORKeyStream(buf, buf)
+	return n, err
+}
+
+func mustReadByte(r *bufio.Reader) byte {
+	b, err := r.ReadByte()
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func handshake(r *bufio.Reader, w io.Writer) error {
+	//获取客户端协议版本，1个字节，ReadByte表示读取1个字节
+	version, _ := r.ReadByte()
+	// version := mustReadByte(r)
+	log.Printf("version:%d\n", version)
+	if version != 5 {
+		return errors.New("bad version")
+	}
+	//读取认证方式长度，1个字节
+	nmethods, _ := r.ReadByte()
+	// nmethods := mustReadByte(r)
+	log.Printf("nmethods:%d\n", nmethods)
+
+	//读取认证方式，根据认证方式长度，创建对应的BUF，当BUF读满则完整读出认证方式
+	buf := make([]byte, nmethods)
+	io.ReadFull(r, buf) //从r中读取内容，直到buf填充满
+	log.Printf("buf: %v", buf)
+
+	//给客户端返回服务端支持的认证方式及长度
+	resp := []byte{5, 0}
+	w.Write(resp)
+	return nil
+}
+
+func readAddr(r *bufio.Reader) (addr string, err error) {
+	//读取客户端发来的请求协议信息，1个字节
+	version, _ := r.ReadByte()
+	// defer func() { //不建议使用，应用不广泛
+	// 	e := recover()
+	// 	err := e.(error)  //类型断言，只能对接口断言
+	// }()
+	// version := mustReadByte(r)
+	log.Printf("Version: %d\n", version)
+	if version != 5 {
+		return "", errors.New("bad version")
+	}
+
+	//读取客户端发来的代理请求类型，1个字节
+	cmd, _ := r.ReadByte()
+	// cmd := mustReadByte(r)
+	log.Printf("client request type: %d\n", cmd)
+	if cmd != 1 {
+		return "", errors.New("bad client type")
+	}
+
+	//读取保留字，1个字节，跳过
+	r.ReadByte()
+
+	//读取addr type字段，1个字节
+	atyp, _ := r.ReadByte()
+	log.Printf("%v", atyp)
+
+	if atyp != 3 {
+		return "", errors.New("bad address type")
+	}
+
+	// rt := fmt.Sprintf("%v--%v--%v", version, cmd, atyp)
+
+	//读取一个字节的数据，代表后面紧跟着的域名长度
+	addlen, _ := r.ReadByte()
+	log.Printf("addr len: %d\n", addlen)
+
+	//读取n个字节得到域名，n根据上一步得到的结果来决定
+	buf := make([]byte, addlen)
+	io.ReadFull(r, buf)
+	log.Printf("addr buf: %s\n", buf)
+
+	//读取端口
+	//参数一，参数二：BigEndian大断续，参数三：数据存放的变量地址
+	var port int16
+	binary.Read(r, binary.BigEndian, &port)
+	log.Printf("addr port: %d\n", port)
+
+	return fmt.Sprintf("%s:%d", buf, port), nil
+}
+
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+
+	//解密通道
+	r := bufio.NewReader(NewCryptoReader(conn, "123456"))
+
+	//加密通道
+	w := NewCryptoWriter(conn, "123456")
+	handshake(r, w)
+	addr, _ := readAddr(r)
+	resp := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	w.Write(resp)
+	proxy(r, w, addr)
+}
+
+func proxy(r io.Reader, w io.Writer, address string) {
+	log.Print(address)
+	toDst, err := net.Dial("tcp", address)
+	if err != nil {
+		log.Fatal(err)
+		// r.Close()
+		return
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		io.Copy(toDst, r)
+		toDst.Close()
+	}()
+
+	//go 从目标服务器发送到客户端的协程
+	go func() {
+		defer wg.Done()
+		io.Copy(w, toDst)
+		// w.Close()
+		return
+	}()
+	//等待两个协程结束
+	wg.Wait()
+}
+
+func main() {
+	// flag.Parse()
+	// //建立listen
+	// addr := ":7777"
+	listener, err := net.Listen("tcp", ":7778")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer listener.Close()
+	for {
+		//接受新的连接
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go handleConn(conn)
+	}
+
+}

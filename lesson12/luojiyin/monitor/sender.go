@@ -3,7 +3,6 @@ package monitor
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -13,7 +12,7 @@ import (
 
 	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
 	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
+	//	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
 )
 
@@ -22,7 +21,7 @@ type Sender struct {
 	ch   chan *common.Metric
 }
 
-func NewMetric(metric string, value float64) *commom.Metric {
+func NewMetric(metric string, value float64) *common.Metric {
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Print(err)
@@ -59,10 +58,6 @@ func CpuMetric() []*common.Metric {
 	return ret
 }
 
-var (
-	addr = flag.String("trans", "59.110.12.72:6000", "transfer server")
-)
-
 func NewSender(addr string) *Sender {
 	return &Sender{
 		addr: addr,
@@ -96,6 +91,7 @@ func (s *Sender) Start() {
 		select {
 		case metric := <-s.ch:
 			buf, _ := json.Marshal(metric)
+			//log.Print(string(buf))
 			_, err := fmt.Fprintf(w, "%s\n", buf)
 			if err != nil {
 

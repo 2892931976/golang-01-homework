@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/monitor/common"
+	"github.com/shirou/gopsutil/cpu"
+	"log"
 	"net"
 	"os"
 	"runtime"
 	"time"
-
-	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/monitor/common"
-	"github.com/shirou/gopsutil/cpu"
 )
 
 type Sender struct {
@@ -36,6 +36,7 @@ func (s *Sender) Start() {
 		}
 		fmt.Fprintf(conn, "%s\n", buf)
 
+		log.Print(string(buf))
 	}
 
 }

@@ -1,9 +1,8 @@
-package monitor
+package main
 
 import (
+	"lesson12/monitor/common"
 	"time"
-
-	"github.com/51reboot/golang-01-homework/lesson12/luojiyin/common"
 )
 
 type MetricFunc func() []*common.Metric
@@ -21,10 +20,10 @@ func NewSched(ch chan *common.Metric) *Sched {
 func (s *Sched) AddMetric(collecter MetricFunc, step time.Duration) {
 	ticker := time.NewTicker(step)
 	for range ticker.C {
-		for _, metric := range collecter() {
-			if metric != nil {
-				s.ch <- metric
-			}
+		metrics := collecter()
+		for _, metric := range metrics {
+			// log.Print("Sched Metric:", metric)
+			s.ch <- metric
 		}
 	}
 }
