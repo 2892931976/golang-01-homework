@@ -11,10 +11,6 @@ var (
 )
 
 func main() {
-	// addr
-	// agent type {addr metric}
-	//trans type{addr metric}
-	// (agent)addfunc(agentfunc time )
 	flag.Parse()
 
 	ag := agent.NewAgent()

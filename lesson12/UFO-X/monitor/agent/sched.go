@@ -41,7 +41,6 @@ func (s Sched) Send() {
 			}
 
 		case <-tick.C:
-			fmt.Println("tick")
 			err := buf.Flush()
 			if err != nil {
 				log.Println(err)
@@ -53,6 +52,7 @@ func (s Sched) Send() {
 		}
 
 	}
+	tick.Stop()
 }
 func (s Sched) connect() net.Conn {
 

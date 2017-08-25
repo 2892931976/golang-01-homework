@@ -19,7 +19,7 @@ type MetricFunc func() []*common.Metric
 func NewAgent() Agent {
 
 	return Agent{
-		Ch: make(chan *common.Metric, 100),
+		Ch: make(chan *common.Metric, 1000),
 	}
 }
 func NewMetric(met string, val float64) *common.Metric {
