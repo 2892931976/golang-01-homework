@@ -19,4 +19,13 @@ func NewSched(ch chan *common.Metric) *Sched {
 }
 
 func (s *Sched) AddMetric(collecter MetricFunc, step time.Duration) {
+	go func() {
+		ticker := time.NewTicker(step)
+		for range ticker.C {
+			metrics := collecter()
+			for _, metric := range metrics {
+				s.ch <- metric
+			}
+		}
+	}()
 }

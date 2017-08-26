@@ -1,18 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"flag"
+	"log"
 	"os"
+	"os/exec"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/51reboot/golang-01-homework/lesson12/binggan/monitor/common"
+	"github.com/BurntSushi/toml"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
-)
-
-var (
-	transAddr = flag.String("trans", "59.110.12.72:6000", "transfer address")
 )
 
 func NewMetric(metric string, value float64) *common.Metric {
@@ -46,14 +48,73 @@ func CpuMetric() []*common.Metric {
 	return ret
 }
 
+func NewUserMetric(cmdstr string) MetricFunc {
+	return func() []*common.Metric {
+		metrics, err := getUserMetrics(cmdstr)
+		if err != nil {
+			log.Print(err)
+			return []*common.Metric{}
+		}
+		return metrics
+	}
+}
+
+func getUserMetrics(cmdstr string) ([]*common.Metric, error) {
+	// 构建命令
+	// 获取标准输出
+	// 按行解析
+	// 获取key ,value
+	// 包装成common.Metric
+	var ret []*common.Metric
+	cmd := exec.Command("bash", "-c", cmdstr)
+	stdout, _ := cmd.StdoutPipe()
+
+	err := cmd.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	r := bufio.NewReader(stdout)
+	for {
+		line, err := r.ReadString('\n')
+		if err != nil {
+			break
+		}
+		line = strings.TrimSpace(line)
+		fields := strings.Fields(line)
+		if len(fields) != 2 {
+			continue
+		}
+		key, value := fields[0], fields[1]
+		n, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		metric := NewMetric(key, n)
+		ret = append(ret, metric)
+	}
+
+	return ret, nil
+}
+
 func main() {
 	flag.Parse()
-	sender := NewSender(*transAddr)
+
+	_, err := toml.DecodeFile(*configPath, &gcfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sender := NewSender(gcfg.Sender.TransAddr)
 	ch := sender.Channel()
 
 	sched := NewSched(ch)
 
-	sched.AddMetric(CpuMetric, time.Second)
+	sched.AddMetric(CpuMetric, 3*time.Second)
+	for _, ucfg := range gcfg.UserScript {
+		sched.AddMetric(NewUserMetric(ucfg.Path), time.Duration(ucfg.Step)*time.Second)
+	}
 	// memory, time.Second * 3
 	// disk, time.Minute
 	sender.Start()
