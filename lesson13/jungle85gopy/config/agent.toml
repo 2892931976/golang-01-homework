@@ -1,0 +1,11 @@
+[sender]
+trans_addr = ":6000"
+max_sleep_time = 30
+flush_interval = 5
+buffer_len = 1024
+debug = true
+
+[[user_script]]
+path = "./userDefined/user.py" 
+step = 3
+
