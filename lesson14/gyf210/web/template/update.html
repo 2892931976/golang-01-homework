@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update User</title>
+</head>
+<body>
+<form method="post" action="/changeuser/">
+    <p><input name="id" type="hidden" value="{{.Id}}"/></p>
+    <p>用户名：<input name="name" value="{{.Name}}"/></p>
+    <p>Note: <input name="note" value="{{.Note}}"/></p>
+    <p><input type="submit" name="提交" ／></p>
+</form>
+</body>
+</html>

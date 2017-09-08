@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body>
+    <table border="1" cellpadding="0">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Note</th>
+            <th>IsAdmin</th>
+            <th>操作</th>
+        </tr>
+        {{range .}}
+        <tr>
+            <td>{{.Id}}</td>
+            <td>{{.Name}}</td>
+            <td>{{.Note}}</td>
+            <td>{{.IsAdmin}}</td>
+            <td>
+                <a href="/change/?id={{.Id}}" >修改</a>
+                <a href="/delete/?id={{.Id}}" >删除</a>
+            </td>
+        </tr>
+        {{end}}
+    </table>
+    <div>
+        <p><a href="/add/">新增</a></p>
+    </div>
+</body>
+</html>

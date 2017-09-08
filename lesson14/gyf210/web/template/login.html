@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <form method="post" action="/checklogin/">
+        <p>用户名：<input name="name" /></p>
+        <p>密码：<input type="password" name="password"/></p>
+        <p><input type="submit" name="登陆" ／></p>
+    </form>
+    <div>
+        {{ if . }}
+        <p style="color:red">
+            {{.}}
+        </p>
+        {{end}}
+    </div>
+</body>
+</html>
